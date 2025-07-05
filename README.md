@@ -4,7 +4,7 @@
 
 This is a Gym Management System developed for our **Database Systems** course project. The goal is to design a normalized relational database schema that models the core functionalities of a gym facility including membership management, class scheduling, trainer assignments, and equipment maintenance.
 
-We use **PostgreSQL** as our database engine, and **[Supabase](https://supabase.com/)** to simplify deployment, hosting, and management of our database in the cloud.
+We use **MySQL** as our database engine with automatic database initialization for easy setup and deployment.
 
 ---
 
@@ -12,129 +12,251 @@ We use **PostgreSQL** as our database engine, and **[Supabase](https://supabase.
 
 The schema is structured around real-world gym operations, with attention to **data normalization**, **referential integrity**, and **scalability**. Key design elements include:
 
-* **UUIDs** as primary keys for all tables
+* **Auto-incrementing integers** as primary keys for all tables
 * **Audit-friendly** historical tracking (e.g., `MembershipHistory`)
 * **Many-to-many relationships** (e.g., members attending scheduled classes)
 * **Cascade behavior** for foreign keys to maintain data consistency
+* **Automatic database initialization** with sample data
 
 <details>
-<summary><strong>Click to view full SQL schema</strong></summary>
+<summary><strong>Click to view full MySQL schema</strong></summary>
 
 ```sql
--- EXTENSION FOR UUIDs
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- MySQL Database Schema for Gym Management System
+
+CREATE DATABASE IF NOT EXISTS gymdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE gymdb;
+
+SET FOREIGN_KEY_CHECKS=0;
 
 /* ---------- Core reference tables ---------- */
-CREATE TABLE MembershipPlan (
-    plan_id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    plan_name       VARCHAR(100) NOT NULL,
-    monthly_fee     NUMERIC(10,2) NOT NULL CHECK (monthly_fee >= 0),
-    access_level    VARCHAR(50) NOT NULL
+CREATE TABLE IF NOT EXISTS MembershipPlan (
+    PlanID       INT            AUTO_INCREMENT PRIMARY KEY,
+    PlanName     VARCHAR(50)    NOT NULL,
+    MonthlyFee   DECIMAL(8,2)   NOT NULL,
+    AccessLevel  VARCHAR(20)
 );
 
-CREATE TABLE Room (
-    room_id     UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    room_name   VARCHAR(100) NOT NULL UNIQUE,
-    capacity    INTEGER NOT NULL CHECK (capacity > 0)
+CREATE TABLE IF NOT EXISTS Room (
+    RoomID    INT AUTO_INCREMENT PRIMARY KEY,
+    RoomName  VARCHAR(50)  NOT NULL,
+    Capacity  INT          NOT NULL
 );
 
-CREATE TABLE Staff (
-    staff_id    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    first_name  VARCHAR(60) NOT NULL,
-    last_name   VARCHAR(60) NOT NULL,
-    email       VARCHAR(120) NOT NULL UNIQUE,
-    role        VARCHAR(50) NOT NULL
+CREATE TABLE IF NOT EXISTS Staff (
+    StaffID   INT AUTO_INCREMENT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName  VARCHAR(50) NOT NULL,
+    Email     VARCHAR(100) NOT NULL UNIQUE,
+    `Role`    VARCHAR(50)
 );
 
 /* ---------- Member-side tables ---------- */
-CREATE TABLE Member (
-    member_id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    first_name             VARCHAR(60) NOT NULL,
-    last_name              VARCHAR(60) NOT NULL,
-    email                  VARCHAR(120) NOT NULL UNIQUE,
-    phone_number           VARCHAR(20),
-    date_of_birth          DATE,
-    membership_start_date  DATE NOT NULL DEFAULT CURRENT_DATE,
-    membership_status      VARCHAR(30) NOT NULL DEFAULT 'active',
-    current_plan_id        UUID REFERENCES MembershipPlan(plan_id) ON UPDATE CASCADE
+CREATE TABLE IF NOT EXISTS Member (
+    MemberID             INT             AUTO_INCREMENT PRIMARY KEY,
+    FirstName            VARCHAR(50)     NOT NULL,
+    LastName             VARCHAR(50)     NOT NULL,
+    Email                VARCHAR(100)    NOT NULL UNIQUE,
+    DateOfBirth          DATE,
+    PhoneNumber          VARCHAR(20),
+    CurrentPlanID        INT,
+    MembershipStatus     VARCHAR(20),
+    MembershipStartDate  DATE,
+    FOREIGN KEY (CurrentPlanID)
+        REFERENCES MembershipPlan(PlanID)
+        ON DELETE SET NULL
 );
 
-CREATE TABLE MembershipHistory (
-    history_id  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    member_id   UUID NOT NULL REFERENCES Member(member_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    plan_id     UUID NOT NULL REFERENCES MembershipPlan(plan_id) ON UPDATE CASCADE,
-    start_date  DATE NOT NULL,
-    end_date    DATE,
-    CHECK (end_date IS NULL OR end_date >= start_date)
+CREATE TABLE IF NOT EXISTS MembershipHistory (
+    HistoryID  INT AUTO_INCREMENT PRIMARY KEY,
+    MemberID   INT NOT NULL,
+    PlanID     INT NOT NULL,
+    StartDate  DATE NOT NULL,
+    EndDate    DATE,
+    FOREIGN KEY (MemberID)
+        REFERENCES Member(MemberID)
+        ON DELETE CASCADE,
+    FOREIGN KEY (PlanID)
+        REFERENCES MembershipPlan(PlanID)
+        ON DELETE CASCADE
 );
 
-CREATE TABLE Payments (
-    payment_id      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    member_id       UUID NOT NULL REFERENCES Member(member_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    amount          NUMERIC(10,2) NOT NULL CHECK (amount >= 0),
-    payment_date    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    payment_method  VARCHAR(30) NOT NULL,
-    payment_status  VARCHAR(20) NOT NULL
+CREATE TABLE IF NOT EXISTS Payments (
+    PaymentID     INT AUTO_INCREMENT PRIMARY KEY,
+    MemberID      INT NOT NULL,
+    Amount        DECIMAL(10,2) NOT NULL,
+    PaymentDate   DATE NOT NULL,
+    PaymentMethod VARCHAR(50),
+    PaymentStatus VARCHAR(20),
+    FOREIGN KEY (MemberID)
+        REFERENCES Member(MemberID) ON DELETE CASCADE
 );
 
 /* ---------- Trainer + class tables ---------- */
-CREATE TABLE Trainer (
-    trainer_id  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    first_name  VARCHAR(60) NOT NULL,
-    last_name   VARCHAR(60) NOT NULL,
-    email       VARCHAR(120) NOT NULL UNIQUE,
-    specialty   VARCHAR(80)
+CREATE TABLE IF NOT EXISTS Trainer (
+    TrainerID  INT AUTO_INCREMENT PRIMARY KEY,
+    FirstName  VARCHAR(50) NOT NULL,
+    LastName   VARCHAR(50) NOT NULL,
+    Email      VARCHAR(100) NOT NULL UNIQUE,
+    Specialty  VARCHAR(100)
 );
 
-CREATE TABLE FitnessClass (
-    class_id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    class_name       VARCHAR(80) NOT NULL,
-    class_description TEXT,
-    trainer_id       UUID NOT NULL REFERENCES Trainer(trainer_id) ON UPDATE CASCADE,
-    room_id          UUID NOT NULL REFERENCES Room(room_id) ON UPDATE CASCADE,
-    capacity         INTEGER NOT NULL CHECK (capacity > 0)
+CREATE TABLE IF NOT EXISTS FitnessClass (
+    ClassID         INT AUTO_INCREMENT PRIMARY KEY,
+    ClassName       VARCHAR(50) NOT NULL,
+    ClassDescription TEXT,
+    Capacity        INT NOT NULL,
+    RoomID          INT NOT NULL,
+    TrainerID       INT NOT NULL,
+    FOREIGN KEY (RoomID)
+        REFERENCES Room(RoomID) ON DELETE RESTRICT,
+    FOREIGN KEY (TrainerID)
+        REFERENCES Trainer(TrainerID) ON DELETE RESTRICT
 );
 
-CREATE TABLE ClassSchedule (
-    schedule_id   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    class_id      UUID NOT NULL REFERENCES FitnessClass(class_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    schedule_date DATE NOT NULL,
-    start_time    TIME NOT NULL,
-    end_time      TIME NOT NULL,
-    CHECK (end_time > start_time)
+CREATE TABLE IF NOT EXISTS ClassSchedule (
+    ScheduleID   INT AUTO_INCREMENT PRIMARY KEY,
+    ClassID      INT NOT NULL,
+    ScheduleDate DATE NOT NULL,
+    StartTime    TIME NOT NULL,
+    EndTime      TIME NOT NULL,
+    FOREIGN KEY (ClassID)
+        REFERENCES FitnessClass(ClassID) ON DELETE CASCADE
 );
 
-CREATE TABLE Attendance (
-    attendance_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    schedule_id   UUID NOT NULL REFERENCES ClassSchedule(schedule_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    member_id     UUID NOT NULL REFERENCES Member(member_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    status        VARCHAR(20) NOT NULL DEFAULT 'booked',
-    UNIQUE (schedule_id, member_id)
+CREATE TABLE IF NOT EXISTS Attendance (
+    AttendanceID INT AUTO_INCREMENT PRIMARY KEY,
+    MemberID     INT NOT NULL,
+    ScheduleID   INT NOT NULL,
+    Status       VARCHAR(20),
+    FOREIGN KEY (MemberID)
+        REFERENCES Member(MemberID) ON DELETE CASCADE,
+    FOREIGN KEY (ScheduleID)
+        REFERENCES ClassSchedule(ScheduleID) ON DELETE CASCADE
 );
 
 /* ---------- Equipment & maintenance ---------- */
-CREATE TABLE Equipment (
-    equipment_id   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    equipment_name VARCHAR(100) NOT NULL,
-    purchase_date  DATE,
-    condition      VARCHAR(40) NOT NULL
+CREATE TABLE IF NOT EXISTS Equipment (
+    EquipmentID    INT AUTO_INCREMENT PRIMARY KEY,
+    EquipmentName  VARCHAR(50) NOT NULL,
+    PurchaseDate   DATE,
+    `Condition`    VARCHAR(50),
+    RoomID         INT,
+    FOREIGN KEY (RoomID)
+        REFERENCES Room(RoomID) ON DELETE SET NULL
 );
 
-CREATE TABLE EquipmentMaintenance (
-    maintenance_id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    equipment_id           UUID NOT NULL REFERENCES Equipment(equipment_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    staff_id               UUID NOT NULL REFERENCES Staff(staff_id) ON UPDATE CASCADE,
-    maintenance_date       DATE NOT NULL DEFAULT CURRENT_DATE,
-    maintenance_description TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS EquipmentMaintenance (
+    MaintenanceID         INT AUTO_INCREMENT PRIMARY KEY,
+    EquipmentID           INT NOT NULL,
+    StaffID               INT NOT NULL,
+    MaintenanceDescription TEXT,
+    MaintenanceDate       DATE NOT NULL,
+    FOREIGN KEY (EquipmentID)
+        REFERENCES Equipment(EquipmentID) ON DELETE CASCADE,
+    FOREIGN KEY (StaffID)
+        REFERENCES Staff(StaffID) ON DELETE CASCADE
 );
 
-/* ---------- Quick sanity indexes ---------- */
-CREATE INDEX idx_attendance_member ON Attendance(member_id);
-CREATE INDEX idx_schedule_class   ON ClassSchedule(class_id);
-CREATE INDEX idx_member_email     ON Member(email);
+/* ---------- User authentication ---------- */
+CREATE TABLE IF NOT EXISTS `User` (
+    UserID       INT             AUTO_INCREMENT PRIMARY KEY,
+    Username     VARCHAR(50)     NOT NULL UNIQUE,
+    PasswordHash VARCHAR(128)    NOT NULL,
+    Role         ENUM('admin','manager','trainer','member') NOT NULL
+);
+
+SET FOREIGN_KEY_CHECKS=1;
 ```
 
 </details>
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **MySQL Server** (version 5.7 or higher)
+- **Python** (version 3.8 or higher)
+- **pip** (Python package manager)
+
+### Installation & Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd gym-management-system
+   ```
+
+2. **Install dependencies**
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   # or if using uv
+   uv sync
+   ```
+
+3. **Configure environment variables**
+   
+   Create a `.env` file in the `backend` directory:
+   ```env
+   # Database Configuration
+   DB_HOST=localhost
+   DB_USER=root
+   DB_PASS=your_mysql_password
+   DB_NAME=gymdb
+   
+   # Application Configuration
+   SECRET_KEY=your-secret-key-here-change-this-in-production
+   
+   # Admin User Configuration
+   ADMIN_USER=admin
+   ADMIN_PASS=admin
+   ```
+
+4. **Initialize the database**
+   
+   **Option 1: Using the setup script (Recommended)**
+   ```bash
+   python setup_database.py
+   ```
+   
+   **Option 2: Automatic initialization**
+   ```bash
+   python app.py
+   ```
+   The database will be created automatically when you first run the application.
+
+5. **Access the application**
+   
+   Open your browser and navigate to: `http://localhost:5001`
+   
+   **Default login credentials:**
+   - Username: `admin`
+   - Password: `admin`
+
+### Features
+
+- **🔧 Automatic Database Setup**: No manual SQL scripts needed
+- **👥 User Management**: Admin, manager, trainer, and member roles
+- **💳 Membership Plans**: Flexible membership plan management
+- **🏃‍♂️ Member Management**: Complete member profile and history tracking
+- **👨‍🏫 Trainer Management**: Trainer profiles and specialties
+- **🏢 Room Management**: Gym facility and room management
+- **📅 Class Scheduling**: Fitness class scheduling and management
+- **📊 Attendance Tracking**: Member attendance for classes
+- **💰 Payment Processing**: Payment history and status tracking
+- **🔧 Equipment Management**: Equipment inventory and maintenance
+- **📈 Reporting**: Various reports and analytics
+
+### Database Features
+
+- **Automatic Initialization**: Database and tables created automatically
+- **Sample Data**: Includes sample membership plans and rooms
+- **Data Integrity**: Foreign key constraints and referential integrity
+- **Normalized Schema**: Properly normalized database design
+- **Audit Trail**: Historical tracking for memberships and payments
 
 ---
 
