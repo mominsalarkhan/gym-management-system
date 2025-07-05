@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Edit Trainer #{{ trainer.TrainerID }}</h2>
+  <form method="post">
+    <label>First Name:<br><input name="firstName" value="{{ trainer.FirstName }}" required></label><br>
+    <label>Last Name:<br><input name="lastName" value="{{ trainer.LastName }}" required></label><br>
+    <label>Specialty:<br><input name="specialty" value="{{ trainer.Specialty }}" required></label><br>
+    <button type="submit">Save</button>
+    <a href="{{ url_for('trainers.list_trainers') }}">Cancel</a>
+  </form>
+{% endblock %}

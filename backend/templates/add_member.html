@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add Member</h2>
+  <form method="post">
+    <label>First Name:<br><input name="firstName" required></label><br>
+    <label>Last Name:<br><input name="lastName" required></label><br>
+    <label>Email:<br><input type="email" name="email" required></label><br>
+    <button type="submit">Create</button>
+    <a href="{{ url_for('members.list_members') }}">Cancel</a>
+  </form>
+{% endblock %}

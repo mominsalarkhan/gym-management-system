@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Welcome, {{ current_user.Username }}!</h2>
+  <p>Your role: <strong>{{ current_user.role }}</strong></p>
+  <ul>
+    <li><a href="{{ url_for('members.list_members') }}">Manage Members</a></li>
+    <li><a href="{{ url_for('trainers.list_trainers') }}">Manage Trainers</a></li>
+    <li><a href="{{ url_for('rooms.list_rooms') }}">Manage Rooms</a></li>
+    <li><a href="{{ url_for('equipment.list_equipment') }}">Manage Equipment</a></li>
+  </ul>
+{% endblock %}

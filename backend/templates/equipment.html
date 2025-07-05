@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Equipment</h2>
+  <a href="{{ url_for('equipment.add_equipment') }}">+ Add Equipment</a>
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>ID</th><th>Name</th><th>Purchased</th><th>Condition</th><th>Room</th><th>Actions</th>
+    </tr>
+    {% for e in equipment %}
+    <tr>
+      <td>{{ e.EquipmentID }}</td>
+      <td>{{ e.EquipmentName }}</td>
+      <td>{{ e.PurchaseDate }}</td>
+      <td>{{ e.Condition }}</td>
+      <td>{{ e.RoomID }}</td>
+      <td>
+        <a href="{{ url_for('equipment.edit_equipment', eid=e.EquipmentID) }}">Edit</a>
+        <form method="post"
+              action="{{ url_for('equipment.delete_equipment', eid=e.EquipmentID) }}"
+              style="display:inline;"
+              onsubmit="return confirm('Delete {{ e.EquipmentName }}?');">
+          <button type="submit">×</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Edit Member #{{ member.MemberID }}</h2>
+  <form method="post">
+    <label>First Name:<br><input name="firstName" value="{{ member.FirstName }}" required></label><br>
+    <label>Last Name:<br><input name="lastName" value="{{ member.LastName }}" required></label><br>
+    <label>Email:<br><input type="email" name="email" value="{{ member.Email }}" required></label><br>
+    <button type="submit">Save</button>
+    <a href="{{ url_for('members.list_members') }}">Cancel</a>
+  </form>
+{% endblock %}

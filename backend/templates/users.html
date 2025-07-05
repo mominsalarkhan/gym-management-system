@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Users</h2>
+  <a href="{{ url_for('users.add_user') }}">+ Add New User</a>
+  <table border="1" cellpadding="5">
+    <tr><th>ID</th><th>Username</th><th>Role</th><th>Actions</th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.UserID }}</td>
+      <td>{{ u.Username }}</td>
+      <td>{{ u.Role }}</td>
+      <td>
+        <a href="{{ url_for('users.edit_user', uid=u.UserID) }}">Edit</a>
+        <form method="post"
+              action="{{ url_for('users.delete_user', uid=u.UserID) }}"
+              style="display:inline;"
+              onsubmit="return confirm('Really delete user {{ u.Username }}?');">
+          <button type="submit">×</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

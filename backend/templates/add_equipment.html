@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add Equipment</h2>
+  <form method="post">
+    <label>Name:<br><input name="equipmentName" required></label><br>
+    <label>Purchase Date:<br><input type="date" name="purchaseDate" required></label><br>
+    <label>Condition:<br><input name="condition" required></label><br>
+    <label>Room:<br>
+      <select name="roomID">
+        {% for r in rooms %}
+          <option value="{{ r.RoomID }}">{{ r.RoomName }}</option>
+        {% endfor %}
+      </select>
+    </label><br>
+    <button type="submit">Create</button>
+    <a href="{{ url_for('equipment.list_equipment') }}">Cancel</a>
+  </form>
+{% endblock %}

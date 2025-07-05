@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title or "GymApp" }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% if current_user.is_authenticated %}
+  <nav>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a> |
+    <a href="{{ url_for('users.list_users') }}">Users</a> |
+    <a href="{{ url_for('members.list_members') }}">Members</a> |
+    <a href="{{ url_for('trainers.list_trainers') }}">Trainers</a> |
+    <a href="{{ url_for('rooms.list_rooms') }}">Rooms</a> |
+    <a href="{{ url_for('equipment.list_equipment') }}">Equipment</a> |
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+  </nav>
+  <hr>
+  {% endif %}
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for cat, msg in messages %}
+            <li class="{{ cat }}">{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

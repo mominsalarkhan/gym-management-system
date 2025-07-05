@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Edit {{ user.Username }}</h2>
+  <form method="post">
+    <label>Username:<br><input name="username" value="{{ user.Username }}" required></label><br>
+    <label>Role:<br>
+      <select name="role">
+        {% for r in roles %}
+          <option {% if r==user.Role %}selected{% endif %}>{{ r }}</option>
+        {% endfor %}
+      </select>
+    </label><br>
+    <button type="submit">Save</button>
+    <a href="{{ url_for('users.list_users') }}">Cancel</a>
+  </form>
+{% endblock %}

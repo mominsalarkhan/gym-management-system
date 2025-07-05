@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Rooms</h2>
+  <a href="{{ url_for('rooms.add_room') }}">+ Add Room</a>
+  <table border="1" cellpadding="5">
+    <tr><th>ID</th><th>Name</th><th>Capacity</th><th>Actions</th></tr>
+    {% for r in rooms %}
+    <tr>
+      <td>{{ r.RoomID }}</td>
+      <td>{{ r.RoomName }}</td>
+      <td>{{ r.Capacity }}</td>
+      <td>
+        <a href="{{ url_for('rooms.edit_room', rid=r.RoomID) }}">Edit</a>
+        <form method="post"
+              action="{{ url_for('rooms.delete_room', rid=r.RoomID) }}"
+              style="display:inline;"
+              onsubmit="return confirm('Delete room {{ r.RoomName }}?');">
+          <button type="submit">×</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

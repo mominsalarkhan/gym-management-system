@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Edit {{ equipment.EquipmentName }}</h2>
+  <form method="post">
+    <label>Name:<br><input name="equipmentName" value="{{ equipment.EquipmentName }}" required></label><br>
+    <label>Purchase Date:<br><input type="date" name="purchaseDate" value="{{ equipment.PurchaseDate }}" required></label><br>
+    <label>Condition:<br><input name="condition" value="{{ equipment.Condition }}" required></label><br>
+    <label>Room:<br>
+      <select name="roomID">
+        {% for r in rooms %}
+          <option value="{{ r.RoomID }}" {% if r.RoomID==equipment.RoomID %}selected{% endif %}>
+            {{ r.RoomName }}
+          </option>
+        {% endfor %}
+      </select>
+    </label><br>
+    <button type="submit">Save</button>
+    <a href="{{ url_for('equipment.list_equipment') }}">Cancel</a>
+  </form>
+{% endblock %}
