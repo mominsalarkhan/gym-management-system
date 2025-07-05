@@ -14,6 +14,7 @@ import rooms
 import users
 import equipment
 import api
+import db_init
 
 # Point Flask at sibling frontend/ for static files
 app = Flask(
@@ -34,22 +35,35 @@ login_manager.login_view = "auth.login"
 def load_user(user_id):
     return models.get_user_by_id(user_id)
 
-def ensure_default_admin():
+def ensure_database_and_admin():
     """
-    Create the default admin user if it doesn't already exist.
+    Initialize database and create the default admin user if it doesn't already exist.
     Uses ADMIN_USER and ADMIN_PASS from environment.
     """
-    admin_user = os.getenv("ADMIN_USER", "admin")
-    admin_pass = os.getenv("ADMIN_PASS", "admin")
-    if not models.get_user_by_username(admin_user):
-        pw_hash = generate_password_hash(admin_pass, method="pbkdf2:sha256")
-        db = models.get_db()
-        cur = db.cursor()
-        cur.execute(
-            "INSERT INTO `User` (Username, PasswordHash, Role) VALUES (%s, %s, %s)",
-            (admin_user, pw_hash, "admin")
-        )
-        db.commit()
+    try:
+        # Initialize database if it doesn't exist
+        if not db_init.check_database_exists():
+            print("Database not found. Initializing database...")
+            db_init.initialize_database()
+        
+        # Create default admin user
+        admin_user = os.getenv("ADMIN_USER", "admin")
+        admin_pass = os.getenv("ADMIN_PASS", "admin")
+        
+        if not models.get_user_by_username(admin_user):
+            pw_hash = generate_password_hash(admin_pass, method="pbkdf2:sha256")
+            db = models.get_db()
+            cur = db.cursor()
+            cur.execute(
+                "INSERT INTO `User` (Username, PasswordHash, Role) VALUES (%s, %s, %s)",
+                (admin_user, pw_hash, "admin")
+            )
+            db.commit()
+            print(f"Default admin user '{admin_user}' created successfully!")
+        
+    except Exception as e:
+        print(f"Error during database initialization: {e}")
+        raise
 
 # Register your blueprints
 app.register_blueprint(auth.auth_bp)
@@ -72,5 +86,5 @@ def dashboard():
     return render_template("dashboard.html")
 
 if __name__ == "__main__":
-    ensure_default_admin()
+    ensure_database_and_admin()
     app.run(port=5001, debug=True)
