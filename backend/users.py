@@ -1,8 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-import functools
+from members import roles_required
 import models
-from members import roles_required  # reuse decorator
 
 users_bp = Blueprint("users", __name__, url_prefix="/users")
 
@@ -19,9 +18,9 @@ def list_users():
 def add_user():
     if request.method == "POST":
         uname = request.form["username"]
-        pwd   = request.form["password"]
+        pwd   = request.form["password"]   # raw password
         role  = request.form["role"]
-        models.create_user(uname, pwd, role)
+        models.create_user(uname, pwd, role)  # hashing happens in model
         flash(f"User {uname} created.", "success")
         return redirect(url_for("users.list_users"))
     return render_template("add_user.html", roles=["admin","manager","trainer","member"])
@@ -30,14 +29,19 @@ def add_user():
 @login_required
 @roles_required("admin")
 def edit_user(uid):
+    user = models.get_user_by_id(uid)
     if request.method == "POST":
-        models.update_user(uid,
-                           request.form["username"],
-                           request.form["role"])
+        username = request.form["username"]
+        role     = request.form["role"]
+        pwd      = request.form.get("password")  # optional raw new password
+
+        if pwd:
+            models.update_user_password(uid, pwd)  # hashing in model
+
+        models.update_user(uid, username, role)
         flash("User updated.", "success")
         return redirect(url_for("users.list_users"))
-    u = models.get_user_by_id(uid)
-    return render_template("edit_user.html", user=u, roles=["admin","manager","trainer","member"])
+    return render_template("edit_user.html", user=user, roles=["admin","manager","trainer","member"])
 
 @users_bp.route("/delete/<int:uid>", methods=["POST"])
 @login_required

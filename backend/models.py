@@ -2,6 +2,8 @@ import os
 import mysql.connector
 from flask_login import UserMixin
 
+from werkzeug.security import generate_password_hash
+
 def get_db():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST", "localhost"),
@@ -22,14 +24,15 @@ class User(UserMixin):
     def role(self):
         return self.Role
 
-def create_user(Username, PasswordHash, Role="member"):
+def create_user(username, raw_password, role="member"):
+    pw_hash = generate_password_hash(raw_password, method="pbkdf2:sha256")
     db = get_db(); cur = db.cursor()
     cur.execute(
-      "INSERT INTO `User` (Username, PasswordHash, Role) VALUES (%s,%s,%s)",
-      (Username, PasswordHash, Role)
+        "INSERT INTO `User` (Username, PasswordHash, Role) VALUES (%s, %s, %s)",
+        (username, pw_hash, role)
     )
     db.commit()
-
+    
 def get_user_by_username(username):
     db = get_db(); cur = db.cursor(dictionary=True)
     cur.execute("SELECT * FROM `User` WHERE Username=%s", (username,))
