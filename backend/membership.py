@@ -32,20 +32,24 @@ def delete_plan(plan_id):
 
 @membership_bp.route("/history")
 def view_history():
-    history = get_membership_history()
+    history = get_membership_history()  
     return render_template("membership_history.html", history=history)
 
 @membership_bp.route("/history/add", methods=["GET", "POST"])
 def add_history():
     if request.method == "POST":
-        add_membership_history(
-            request.form["MemberID"],
-            request.form["PlanID"],
-            request.form["StartDate"],
-            request.form.get("EndDate")
-        )
+        member_id = request.form.get("MemberID")  # Correct
+        plan_id = request.form.get("plan_id")     # Correct
+        start_date = request.form.get("start_date")
+        end_date = request.form.get("end_date") or None
+
+        print("DEBUG Selected Member:", member_id)
+        print("DEBUG Selected Plan:", plan_id)
+
+        add_membership_history(member_id, plan_id, start_date, end_date)
         flash("History record added", "success")
         return redirect(url_for("membership.view_history"))
+
     members = get_all_members()
     plans = get_all_membership_plans()
     return render_template("add_history.html", members=members, plans=plans)

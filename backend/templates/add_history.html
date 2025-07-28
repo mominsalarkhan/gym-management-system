@@ -1,30 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
   <h2>Add Membership History</h2>
+  <form method="post">
 
-  <form method="POST">
-    <label for="MemberID">Member:</label><br>
+    <label>Member:</label><br>
     <select name="MemberID" required>
       <option value="">Select a member</option>
       {% for m in members %}
-        <option value="{{ m.MemberID }}">{{ m.FirstName }} {{ m.LastName }}</option>
+        <option value="{{ m.MemberID }}"
+          {% if request.form.get('MemberID')|int == m.MemberID %}
+            selected
+          {% endif %}>
+          {{ m.FirstName }} {{ m.LastName }}
+        </option>
       {% endfor %}
     </select><br><br>
 
-    <label for="PlanID">Plan:</label><br>
-    <select name="PlanID" required>
+    <label>Plan:</label><br>
+    <select name="plan_id" required>
       <option value="">Select a plan</option>
-      {% for p in plans %}
-        <option value="{{ p.PlanID }}">{{ p.PlanName }}</option>
+      {% for plan in plans %}
+        <option value="{{ plan.PlanID }}"
+          {% if request.form.get('plan_id')|int == plan.PlanID %}
+            selected
+          {% endif %}>
+          {{ plan.PlanName }} - ${{ plan.MonthlyFee }}
+        </option>
       {% endfor %}
     </select><br><br>
 
-    <label for="StartDate">Start Date:</label><br>
-    <input type="date" name="StartDate" required><br><br>
+    <label>Start Date:</label><br>
+    <input type="date" name="start_date" value="{{ request.form.start_date }}" required><br><br>
 
-    <label for="EndDate">End Date (optional):</label><br>
-    <input type="date" name="EndDate"><br><br>
+    <label>End Date (optional):</label><br>
+    <input type="date" name="end_date" value="{{ request.form.end_date }}"><br><br>
 
-    <input type="submit" value="Add History">
+    <button type="submit">Add History</button>
+    <a href="{{ url_for('membership.view_history') }}">Cancel</a>
   </form>
 {% endblock %}

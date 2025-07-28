@@ -586,18 +586,31 @@ def add_membership_history(MemberID, PlanID, StartDate, EndDate=None):
     )
     db.commit()
 
-def get_membership_history(member_id):
+def get_membership_history(mid=None):
     db = get_db()
-    cursor = db.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT h.*, p.PlanName, m.FirstName, m.LastName
-        FROM MembershipHistory h
-        JOIN MembershipPlan p ON h.PlanID = p.PlanID
-        JOIN Member m ON h.MemberID = m.MemberID
-        WHERE h.MemberID = %s
-        ORDER BY h.StartDate DESC
-    """, (member_id,))
-    return cursor.fetchall()
+    cur = db.cursor(dictionary=True)
+
+    if mid:
+        cur.execute("""
+            SELECT h.HistoryID, h.MemberID, m.FirstName, m.LastName,
+                   h.PlanID, p.PlanName, h.StartDate, h.EndDate
+            FROM MembershipHistory h
+            JOIN Member m ON h.MemberID = m.MemberID
+            JOIN MembershipPlan p ON h.PlanID = p.PlanID
+            WHERE h.MemberID = %s
+            ORDER BY h.StartDate DESC
+        """, (mid,))
+    else:
+        cur.execute("""
+            SELECT h.HistoryID, h.MemberID, m.FirstName, m.LastName,
+                   h.PlanID, p.PlanName, h.StartDate, h.EndDate
+            FROM MembershipHistory h
+            JOIN Member m ON h.MemberID = m.MemberID
+            JOIN MembershipPlan p ON h.PlanID = p.PlanID
+            ORDER BY h.StartDate DESC
+        """)
+
+    return cur.fetchall()
 
 def record_membership_change(member_id, plan_id):
     db = get_db()
@@ -645,12 +658,8 @@ def get_member_id_by_history_id(hid):
     row = cursor.fetchone()
     return row[0] if row else None
 
-def get_user_by_username(username):
-    db = get_db(); cur = db.cursor(dictionary=True)
-    cur.execute("SELECT * FROM `User` WHERE Username=%s", (username,))
-    return cur.fetchone()  # returns dict
-
-def get_user_by_id(uid):
-    db = get_db(); cur = db.cursor(dictionary=True)
-    cur.execute("SELECT * FROM `User` WHERE UserID=%s", (uid,))
-    return cur.fetchone()  # returns dict
+def delete_membership_plan(plan_id):
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("DELETE FROM MembershipPlan WHERE PlanID = %s", (plan_id,))
+    db.commit()

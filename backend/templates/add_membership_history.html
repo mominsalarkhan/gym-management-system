@@ -16,22 +16,28 @@
           {{ m.FirstName }} {{ m.LastName }}
         </option>
       {% endfor %}
-    </select>
+    </select><br><br>
 
     <label>Plan:</label><br>
-    <select name="PlanID" required>
+    <select name="plan_id" required>
       {% for plan in plans %}
         <option value="{{ plan.PlanID }}">{{ plan.PlanName }} - ${{ plan.MonthlyFee }}</option>
       {% endfor %}
     </select><br><br>
 
     <label>Start Date:</label><br>
-    <input type="date" name="StartDate" required><br><br>
+    <input type="date" name="start_date" required><br><br>
 
     <label>End Date (optional):</label><br>
-    <input type="date" name="EndDate"><br><br>
+    <input type="date" name="end_date"><br><br>
 
     <button type="submit">Add History</button>
-    <a href="{{ url_for('members.view_membership_history', mid=member.MemberID) }}">Cancel</a>
+
+    {% if member %}
+      <a href="{{ url_for('members.view_membership_history', mid=member.MemberID) }}">Cancel</a>
+    {% else %}
+      <a href="{{ url_for('members.list_members') }}">Cancel</a>
+    {% endif %}
+    
   </form>
 {% endblock %}

@@ -102,25 +102,26 @@ def view_membership_history(mid):
     member = models.get_member_by_id(mid)
     return render_template("membership_history.html", history=history, member=member)
 
+@members_bp.route("/history/add", defaults={"mid": None}, methods=["GET", "POST"])
 @members_bp.route("/history/add/<int:mid>", methods=["GET", "POST"])
 @login_required
-@roles_required("admin", "manager")
 def add_membership_history(mid):
-    members = models.get_all_members()
-    plans = models.get_all_membership_plans()
-    member = models.get_member_by_id(mid)
+    member = models.get_member_by_id(mid) if mid else None
 
     if request.method == "POST":
-        member_id = request.form.get("MemberID") or mid
-        plan_id = request.form["PlanID"]
-        start_date = request.form["StartDate"]
-        end_date = request.form.get("EndDate") or None
+        plan_id = request.form["plan_id"]
+        start_date = request.form["start_date"]
+        end_date = request.form.get("end_date") or None
 
-        models.create_membership_history(member_id, plan_id, start_date, end_date)
+        mid = int(request.form.get("MemberID", 0))
+
+        models.add_membership_history(mid, plan_id, start_date, end_date)
         flash("History added.", "success")
-        return redirect(url_for("members.view_membership_history", mid=member_id))
+        return redirect(url_for("membership.view_history"))
 
-    return render_template("add_membership_history.html", members=members, plans=plans, member=member)
+    plans = models.get_all_membership_plans()
+    members = models.get_all_members()
+    return render_template("add_membership_history.html", member=member, plans=plans, members=members)
 
 @members_bp.route("/plans/add", methods=["GET", "POST"])
 @login_required

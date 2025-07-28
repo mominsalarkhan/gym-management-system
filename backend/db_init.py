@@ -2,6 +2,7 @@ import os
 import mysql.connector
 from mysql.connector import Error
 import logging
+from datetime import date, timedelta, datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -47,11 +48,9 @@ def create_tables():
     try:
         connection = get_db_connection()
         cursor = connection.cursor()
-        
-        # Disable foreign key checks temporarily
+
         cursor.execute("SET FOREIGN_KEY_CHECKS=0")
-        
-        # SQL statements for creating tables
+
         tables = {
             'MembershipPlan': """
                 CREATE TABLE IF NOT EXISTS MembershipPlan (
@@ -61,7 +60,7 @@ def create_tables():
                     AccessLevel  VARCHAR(20)
                 )
             """,
-            
+
             'Member': """
                 CREATE TABLE IF NOT EXISTS Member (
                     MemberID             INT             AUTO_INCREMENT PRIMARY KEY,
@@ -78,7 +77,7 @@ def create_tables():
                         ON DELETE SET NULL
                 )
             """,
-            
+
             'MembershipHistory': """
                 CREATE TABLE IF NOT EXISTS MembershipHistory (
                     HistoryID  INT AUTO_INCREMENT PRIMARY KEY,
@@ -94,7 +93,7 @@ def create_tables():
                         ON DELETE CASCADE
                 )
             """,
-            
+
             'Trainer': """
                 CREATE TABLE IF NOT EXISTS Trainer (
                     TrainerID  INT AUTO_INCREMENT PRIMARY KEY,
@@ -104,7 +103,7 @@ def create_tables():
                     Specialty  VARCHAR(100)
                 )
             """,
-            
+
             'Room': """
                 CREATE TABLE IF NOT EXISTS Room (
                     RoomID    INT AUTO_INCREMENT PRIMARY KEY,
@@ -112,7 +111,7 @@ def create_tables():
                     Capacity  INT          NOT NULL
                 )
             """,
-            
+
             'FitnessClass': """
                 CREATE TABLE IF NOT EXISTS FitnessClass (
                     ClassID         INT AUTO_INCREMENT PRIMARY KEY,
@@ -127,7 +126,7 @@ def create_tables():
                         REFERENCES Trainer(TrainerID) ON DELETE RESTRICT
                 )
             """,
-            
+
             'ClassSchedule': """
                 CREATE TABLE IF NOT EXISTS ClassSchedule (
                     ScheduleID   INT AUTO_INCREMENT PRIMARY KEY,
@@ -139,7 +138,7 @@ def create_tables():
                         REFERENCES FitnessClass(ClassID) ON DELETE CASCADE
                 )
             """,
-            
+
             'Attendance': """
                 CREATE TABLE IF NOT EXISTS Attendance (
                     AttendanceID INT AUTO_INCREMENT PRIMARY KEY,
@@ -152,7 +151,7 @@ def create_tables():
                         REFERENCES ClassSchedule(ScheduleID) ON DELETE CASCADE
                 )
             """,
-            
+
             'Payments': """
                 CREATE TABLE IF NOT EXISTS Payments (
                     PaymentID     INT AUTO_INCREMENT PRIMARY KEY,
@@ -165,7 +164,7 @@ def create_tables():
                         REFERENCES Member(MemberID) ON DELETE CASCADE
                 )
             """,
-            
+
             'Equipment': """
                 CREATE TABLE IF NOT EXISTS Equipment (
                     EquipmentID    INT AUTO_INCREMENT PRIMARY KEY,
@@ -177,7 +176,7 @@ def create_tables():
                         REFERENCES Room(RoomID) ON DELETE SET NULL
                 )
             """,
-            
+
             'Staff': """
                 CREATE TABLE IF NOT EXISTS Staff (
                     StaffID   INT AUTO_INCREMENT PRIMARY KEY,
@@ -187,7 +186,7 @@ def create_tables():
                     `Role`    VARCHAR(50)
                 )
             """,
-            
+
             'EquipmentMaintenance': """
                 CREATE TABLE IF NOT EXISTS EquipmentMaintenance (
                     MaintenanceID         INT AUTO_INCREMENT PRIMARY KEY,
@@ -201,7 +200,7 @@ def create_tables():
                         REFERENCES Staff(StaffID) ON DELETE CASCADE
                 )
             """,
-            
+
             'User': """
                 CREATE TABLE IF NOT EXISTS `User` (
                     UserID       INT             AUTO_INCREMENT PRIMARY KEY,
@@ -209,81 +208,166 @@ def create_tables():
                     PasswordHash VARCHAR(128)    NOT NULL,
                     Role         ENUM('admin','manager','trainer','member') NOT NULL
                 )
+            """,
+
+            'MaintenanceLog': """
+                CREATE TABLE IF NOT EXISTS MaintenanceLog (
+                    LogID INT AUTO_INCREMENT PRIMARY KEY,
+                    EquipmentID INT NOT NULL,
+                    ReportedBy INT NOT NULL,
+                    IssueDescription TEXT NOT NULL,
+                    ReportDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    ResolutionStatus ENUM('pending', 'in_progress', 'resolved') DEFAULT 'pending',
+                    ResolutionNotes TEXT,
+                    ResolvedBy INT,
+                    ResolveDate DATETIME,
+                    FOREIGN KEY (EquipmentID) REFERENCES Equipment(EquipmentID),
+                    FOREIGN KEY (ReportedBy) REFERENCES User(UserID),
+                    FOREIGN KEY (ResolvedBy) REFERENCES User(UserID)
+                )
+            """,
+
+            'CalendarEvent': """
+                CREATE TABLE IF NOT EXISTS CalendarEvent (
+                    EventID INT AUTO_INCREMENT PRIMARY KEY,
+                    Title VARCHAR(255) NOT NULL,
+                    Description TEXT,
+                    StartTime DATETIME NOT NULL,
+                    EndTime DATETIME NOT NULL,
+                    Location VARCHAR(255),
+                    CreatedBy INT NOT NULL,
+                    EventType ENUM('class', 'maintenance', 'meeting', 'other') DEFAULT 'other',
+                    FOREIGN KEY (CreatedBy) REFERENCES User(UserID)
+                )
             """
         }
-        
-        # Execute table creation
+
         for table_name, sql in tables.items():
             cursor.execute(sql)
             logger.info(f"Table '{table_name}' created or already exists")
-        
-        # Re-enable foreign key checks
+
         cursor.execute("SET FOREIGN_KEY_CHECKS=1")
-        
+
         connection.commit()
         cursor.close()
         connection.close()
-        
-        logger.info("All tables created successfully")
-        
+
+        logger.info("✅ All tables created successfully")
+
     except Error as e:
-        logger.error(f"Error creating tables: {e}")
+        logger.error(f"❌ Error creating tables: {e}")
         raise
 
 def insert_sample_data():
-    """Insert sample data if tables are empty"""
     try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-        
-        # Check if MembershipPlan table has data
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        today = date.today()
+        now = datetime.now()
+
         cursor.execute("SELECT COUNT(*) FROM MembershipPlan")
-        result = cursor.fetchone()
-        count = result[0] if result and len(result) > 0 else 0
-        
-        if count == 0:
-            # Insert sample membership plans
-            sample_plans = [
-                ("Basic Plan", 29.99, "Basic"),
-                ("Standard Plan", 49.99, "Standard"),
-                ("Premium Plan", 79.99, "Premium"),
-                ("VIP Plan", 129.99, "VIP")
-            ]
-            
+        if cursor.fetchone()[0] == 0:
+            # MembershipPlan
             cursor.executemany(
                 "INSERT INTO MembershipPlan (PlanName, MonthlyFee, AccessLevel) VALUES (%s, %s, %s)",
-                sample_plans
+                [("Basic", 30, "Basic"), ("Standard", 50, "Standard"), ("Premium", 80, "Premium")]
             )
-            logger.info("Sample membership plans inserted")
-        
-        # Check if Room table has data
-        cursor.execute("SELECT COUNT(*) FROM Room")
-        result = cursor.fetchone()
-        count = result[0] if result else 0
-        
-        if count == 0:
-            # Insert sample rooms
-            sample_rooms = [
-                ("Main Gym", 50),
-                ("Cardio Room", 30),
-                ("Yoga Studio", 20),
-                ("Spin Class Room", 25),
-                ("Weight Room", 40)
-            ]
-            
+
+            # Members
+            cursor.executemany(
+                "INSERT INTO Member (FirstName, LastName, Email, DateOfBirth, PhoneNumber, CurrentPlanID, MembershipStatus, MembershipStartDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                [("Alice", "Smith", "alice@example.com", "1990-05-01", "1234567890", 1, "Active", today),
+                 ("Bob", "Brown", "bob@example.com", "1985-10-10", "9876543210", 2, "Active", today - timedelta(days=30))]
+            )
+
+            # MembershipHistory
+            cursor.executemany(
+                "INSERT INTO MembershipHistory (MemberID, PlanID, StartDate, EndDate) VALUES (%s, %s, %s, %s)",
+                [(1, 1, today - timedelta(days=60), today - timedelta(days=30)),
+                 (1, 2, today - timedelta(days=30), None),
+                 (2, 2, today - timedelta(days=90), today - timedelta(days=1))]
+            )
+
+            # Trainers
+            cursor.executemany(
+                "INSERT INTO Trainer (FirstName, LastName, Email, Specialty) VALUES (%s, %s, %s, %s)",
+                [("Tom", "Trainer", "tom@example.com", "Weightlifting"), ("Sue", "Coach", "sue@example.com", "Yoga")]
+            )
+
+            # Room
             cursor.executemany(
                 "INSERT INTO Room (RoomName, Capacity) VALUES (%s, %s)",
-                sample_rooms
+                [("Main Gym", 40), ("Yoga Room", 20)]
             )
-            logger.info("Sample rooms inserted")
-        
-        connection.commit()
+
+            # FitnessClass
+            cursor.executemany(
+                "INSERT INTO FitnessClass (ClassName, ClassDescription, Capacity, RoomID, TrainerID) VALUES (%s, %s, %s, %s, %s)",
+                [("Yoga", "Morning yoga", 20, 2, 2), ("HIIT", "Intense interval", 30, 1, 1)]
+            )
+
+            # ClassSchedule
+            cursor.executemany(
+                "INSERT INTO ClassSchedule (ClassID, ScheduleDate, StartTime, EndTime) VALUES (%s, %s, %s, %s)",
+                [(1, today, "08:00:00", "09:00:00"), (2, today, "18:00:00", "19:00:00")]
+            )
+
+            # Attendance
+            cursor.executemany(
+                "INSERT INTO Attendance (MemberID, ScheduleID, Status) VALUES (%s, %s, %s)",
+                [(1, 1, "Present"), (2, 2, "Absent")]
+            )
+
+            # Payments
+            cursor.executemany(
+                "INSERT INTO Payments (MemberID, Amount, PaymentDate, PaymentMethod, PaymentStatus) VALUES (%s, %s, %s, %s, %s)",
+                [(1, 30, today, "Card", "Paid"), (2, 50, today, "Cash", "Pending")]
+            )
+
+            # Equipment
+            cursor.executemany(
+                "INSERT INTO Equipment (EquipmentName, PurchaseDate, `Condition`, RoomID) VALUES (%s, %s, %s, %s)",
+                [("Treadmill", today - timedelta(days=365), "Good", 1), ("Bike", today - timedelta(days=180), "Fair", 1)]
+            )
+
+            # Staff
+            cursor.executemany(
+                "INSERT INTO Staff (FirstName, LastName, Email, `Role`) VALUES (%s, %s, %s, %s)",
+                [("Steve", "Fixit", "steve@example.com", "Maintenance"), ("Nina", "Care", "nina@example.com", "Support")]
+            )
+
+            # EquipmentMaintenance
+            cursor.executemany(
+                "INSERT INTO EquipmentMaintenance (EquipmentID, StaffID, MaintenanceDescription, MaintenanceDate) VALUES (%s, %s, %s, %s)",
+                [(1, 1, "Lubricated belt", today), (2, 2, "Seat adjustment", today)]
+            )
+
+            # User
+            cursor.executemany(
+                "INSERT INTO `User` (Username, PasswordHash, Role) VALUES (%s, %s, %s)",
+                [("admin", "hash1", "admin"), ("trainer1", "hash2", "trainer")]
+            )
+
+            # MaintenanceLog
+            cursor.executemany(
+                "INSERT INTO MaintenanceLog (EquipmentID, ReportedBy, IssueDescription, ResolutionStatus) VALUES (%s, %s, %s, %s)",
+                [(1, 1, "Overheating motor", "pending"), (2, 2, "Loose bolts", "resolved")]
+            )
+
+            # CalendarEvent
+            cursor.executemany(
+                "INSERT INTO CalendarEvent (Title, Description, StartTime, EndTime, Location, CreatedBy, EventType) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                [("Monthly Meeting", "Review performance", now, now + timedelta(hours=1), "Conf Room", 1, "meeting")]
+            )
+
+        conn.commit()
         cursor.close()
-        connection.close()
-        
+        conn.close()
+        logger.info("✅ Sample data inserted successfully")
     except Error as e:
-        logger.error(f"Error inserting sample data: {e}")
+        logger.error(f"Error inserting data: {e}")
         raise
+
 
 def initialize_database():
     """Main function to initialize the complete database"""

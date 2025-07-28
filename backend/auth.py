@@ -11,16 +11,10 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        user_dict = get_user_by_username(username)
+        user_obj = get_user_by_username(username)
 
-        if user_dict and check_password_hash(user_dict["PasswordHash"], password):
-            user = User(
-                uid=user_dict["UserID"],
-                username=user_dict["Username"],
-                password_hash=user_dict["PasswordHash"],
-                role=user_dict["Role"]
-            )
-            login_user(user)
+        if user_obj and check_password_hash(user_obj.PasswordHash, password):
+            login_user(user_obj)
             return redirect(url_for("dashboard"))
         else:
             flash("Invalid username or password", "error")

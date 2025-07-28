@@ -9,7 +9,7 @@
       <li><a href="{{ url_for('users.list_users') }}">Manage Users</a></li>
       <li><a href="{{ url_for('members.list_members') }}">Manage Members</a></li>
       <li><a href="{{ url_for('members.list_membership_plans') }}">Manage Membership Plans</a></li>
-      <li><a href="{{ url_for('members.view_membership_history', mid=current_user.id) }}">Manage Membership History</a></li>
+      <li><a href="{{ url_for('membership.view_history') }}">Membership History</a></li>
       <li><a href="{{ url_for('trainers.list_trainers') }}">Manage Trainers</a></li>
       <li><a href="{{ url_for('rooms.list_rooms') }}">Manage Rooms</a></li>
       <li><a href="{{ url_for('equipment.list_equipment') }}">Manage Equipment</a></li>

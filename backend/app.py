@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash
 import models
 import auth
 import members
+import membership
 import trainers
 import rooms
 import users
@@ -38,15 +39,7 @@ login_manager.login_view = "auth.login"
 
 @login_manager.user_loader
 def load_user(user_id):
-    user_dict = get_user_by_id(user_id)
-    if user_dict:
-        return User(
-            uid=user_dict["UserID"],
-            username=user_dict["Username"],
-            password_hash=user_dict["PasswordHash"],
-            role=user_dict["Role"]
-        )
-    return None
+    return get_user_by_id(user_id)
 
 # ── Ensure Database and Admin ──
 def ensure_database_and_admin():
@@ -77,6 +70,7 @@ def ensure_database_and_admin():
 app.register_blueprint(auth.auth_bp)
 app.register_blueprint(users.users_bp)
 app.register_blueprint(members.members_bp)
+app.register_blueprint(membership.membership_bp)
 app.register_blueprint(trainers.trainers_bp)
 app.register_blueprint(rooms.rooms_bp)
 app.register_blueprint(equipment.equipment_bp)

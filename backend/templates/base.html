@@ -14,7 +14,7 @@
   <li><a href="{{ url_for('users.list_users') }}">Users</a></li>
   <li><a href="{{ url_for('members.list_members') }}">Members</a></li>
   <li><a href="{{ url_for('members.list_membership_plans') }}">Membership Plans</a></li>
-  <li><a href="{{ url_for('members.view_membership_history', mid=current_user.id) }}">Membership History</a></li>
+  <li><a href="{{ url_for('membership.view_history') }}">Membership History</a></li>
   <li><a href="{{ url_for('trainers.list_trainers') }}">Trainers</a></li>
   <li><a href="{{ url_for('rooms.list_rooms') }}">Rooms</a></li>
   <li><a href="{{ url_for('equipment.list_equipment') }}">Equipment</a></li>
