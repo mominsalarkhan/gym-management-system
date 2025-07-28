@@ -1,43 +1,66 @@
+
 # Database Setup Guide
 
 This guide explains how to set up the database for the Gym Management System.
 
-## Automatic Database Initialization
+---
 
-The system now includes automatic database initialization that will:
+## 🚀 Automatic Database Initialization
+
+The system includes automatic database setup that will:
+
 - Create the database if it doesn't exist
 - Create all required tables
-- Insert sample data (membership plans and rooms)
-- Set up the default admin user
+- Insert sample data into:
+  - Membership Plans
+  - Rooms
+  - Trainers
+  - Members
+  - Fitness Classes and Schedules
+  - Payments
+  - Attendance
+  - Equipment
+  - Staff
+  - Equipment Maintenance
+  - Membership History
+- Set up a default admin user
 
-## Setup Methods
+---
 
-### Method 1: Using the Setup Script (Recommended)
+## ⚙️ Setup Methods
 
-1. Run the database setup script:
-   ```bash
-   python setup_database.py
-   ```
+### ✅ Method 1: Using the Setup Script (Recommended)
 
-2. The script will:
-   - Check if the database exists
-   - Create the database and tables if needed
-   - Insert sample data
-   - Display the default admin credentials
+Run the setup script manually if you want full control:
 
-### Method 2: Automatic Setup on App Start
+```bash
+python setup_database.py
+```
 
-The database will be automatically initialized when you start the application:
+The script will:
+
+- Check if the database exists
+- Create the database and tables if needed
+- Insert sample data
+- Show the default admin login credentials
+
+---
+
+### 🔄 Method 2: Automatic Setup on App Launch
+
+If you don’t want to run the script manually, the app will auto-initialize:
 
 ```bash
 python app.py
 ```
 
-If the database doesn't exist, it will be created automatically.
+If the database doesn’t exist, it will be created along with all required tables and sample data.
 
-## Environment Configuration
+---
 
-Create a `.env` file in the backend directory with the following variables:
+## 🔐 Environment Configuration
+
+Create a `.env` file in the `backend/` directory with the following variables:
 
 ```env
 # Database Configuration
@@ -54,72 +77,131 @@ ADMIN_USER=admin
 ADMIN_PASS=admin
 ```
 
-## Database Schema
+---
 
-The system creates the following tables:
+## 🧱 Database Schema
+
+The system automatically creates the following tables:
 
 ### Core Tables
-- `User` - System users (admin, manager, trainer, member)
-- `MembershipPlan` - Available membership plans
-- `Member` - Gym members
-- `Trainer` - Gym trainers
-- `Room` - Gym rooms and facilities
+- `User` — System users (admin, manager, trainer, member)
+- `MembershipPlan` — Membership tiers
+- `Member` — Registered gym members
+- `Trainer` — Trainers available at the gym
+- `Room` — Rooms and facilities
 
 ### Operational Tables
-- `MembershipHistory` - Member plan history
-- `FitnessClass` - Available fitness classes
-- `ClassSchedule` - Class schedules
-- `Attendance` - Class attendance records
-- `Payments` - Payment records
-- `Equipment` - Gym equipment inventory
-- `Staff` - Staff members
-- `EquipmentMaintenance` - Equipment maintenance records
+- `MembershipHistory` — Membership changes and upgrades
+- `FitnessClass` — Types of classes
+- `ClassSchedule` — Scheduled class times
+- `Attendance` — Who attended which class
+- `Payments` — Member payments
+- `Equipment` — Equipment inventory
+- `Staff` — Non-trainer staff (e.g. maintenance)
+- `EquipmentMaintenance` — Maintenance activity logs
+- `MaintenanceLog` — Reported/resolved issues
+- `CalendarEvent` — General-purpose event calendar
 
-## Sample Data
+---
 
-The system automatically inserts sample data:
+## 📦 Sample Data Included
 
 ### Membership Plans
-- Basic Plan ($29.99/month)
-- Standard Plan ($49.99/month)
-- Premium Plan ($79.99/month)
-- VIP Plan ($129.99/month)
+- Basic Plan — $29.99/month
+- Standard Plan — $49.99/month
+- Premium Plan — $79.99/month
+- VIP Plan — $129.99/month
 
 ### Rooms
-- Main Gym (50 capacity)
-- Cardio Room (30 capacity)
-- Yoga Studio (20 capacity)
-- Spin Class Room (25 capacity)
-- Weight Room (40 capacity)
+- Main Gym — 50 capacity
+- Cardio Room — 30 capacity
+- Yoga Studio — 20 capacity
+- Spin Class Room — 25 capacity
+- Weight Room — 40 capacity
 
-## Default Admin Account
+### Trainers
+- John Doe — Strength
+- Jane Smith — Yoga
+- Mike Johnson — Cardio
 
-After setup, you can log in with:
-- Username: `admin` (or value from `ADMIN_USER` env var)
-- Password: `admin` (or value from `ADMIN_PASS` env var)
+### Members
+- Alice Smith
+- Bob Brown
+- Charlie Davis
 
-## Troubleshooting
+### Classes
+- Yoga Flow — Yoga Studio, Jane Smith
+- HIIT — Main Gym, John Doe
+
+### Schedules
+- Yoga Flow: Daily 9:00–10:00 AM
+- HIIT: Every Mon/Wed/Fri 6:00–7:00 PM
+
+### Attendance
+- Sample attendance records for Alice and Bob
+
+### Payments
+- Recent payments made by each sample member
+
+### Equipment
+- Treadmills, Dumbbells, Mats, etc.
+
+### Staff
+- Maintenance and support staff
+
+### Equipment Maintenance
+- Example records of past maintenance
+
+### Membership History
+- History records for Alice and Bob showing plan changes and durations
+
+---
+
+## 👤 Default Admin Account
+
+After setup, log in with:
+
+- **Username:** `admin` (or `ADMIN_USER` from `.env`)
+- **Password:** `admin` (or `ADMIN_PASS` from `.env`)
+
+You can change these in your `.env` file or reset via the database.
+
+---
+
+## 🧹 Manual Database Reset
+
+If you want to reset everything:
+
+1. Run:
+   ```bash
+   python setup_database.py
+   ```
+2. When prompted, choose `y` to reinitialize the database.
+
+---
+
+## 🛠 Troubleshooting
 
 ### Database Connection Issues
-1. Ensure MySQL is running
-2. Check database credentials in `.env` file
-3. Verify the database user has proper permissions
 
-### Permission Issues
-The database user needs the following permissions:
-- CREATE (for database and tables)
-- INSERT, UPDATE, DELETE (for data operations)
-- SELECT (for data retrieval)
+- ✅ Ensure MySQL server is running
+- ✅ Verify credentials in `.env`
+- ✅ Confirm your DB user has permission to create databases
 
-### Manual Database Reset
-If you need to reset the database:
-1. Run the setup script: `python setup_database.py`
-2. Choose 'y' when asked to reinitialize
+### Permissions Required
 
-## Features
+Your MySQL user needs:
+- `CREATE`, `DROP`
+- `INSERT`, `UPDATE`, `DELETE`
+- `SELECT`, `REFERENCES`
 
-- **Automatic Detection**: The system detects if the database exists
-- **Safe Initialization**: Uses `IF NOT EXISTS` clauses to prevent errors
-- **Sample Data**: Includes useful sample data for testing
-- **Error Handling**: Comprehensive error handling and logging
-- **Environment Based**: Uses environment variables for configuration 
+---
+
+## ✅ Features
+
+- Automatic database detection
+- Safe `IF NOT EXISTS` table creation
+- Rich sample data across all tables
+- Modular and reusable setup logic
+- Environment-based configuration
+- Error logging with helpful messages
