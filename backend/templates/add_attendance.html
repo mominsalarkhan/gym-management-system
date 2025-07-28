@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Attendance Record</h2>
+<form method="post">
+  <label>Member:</label>
+  <select name="MemberID">
+    {% for m in members %}
+      <option value="{{ m.MemberID }}">{{ m.FirstName }} {{ m.LastName }}</option>
+    {% endfor %}
+  </select><br><br>
+
+  <label>Schedule:</label>
+  <select name="ScheduleID">
+    {% for s in schedules %}
+      <option value="{{ s.ScheduleID }}">Class {{ s.ClassID }} on {{ s.ScheduleDate }}</option>
+    {% endfor %}
+  </select><br><br>
+
+  <label>Status:</label>
+  <select name="Status">
+    <option value="present">Present</option>
+    <option value="absent">Absent</option>
+  </select><br><br>
+
+  <button type="submit">Add</button>
+</form>
+<a href="{{ url_for('classes.list_classes') }}">Cancel</a>
+{% endblock %}

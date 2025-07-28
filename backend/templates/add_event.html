@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Calendar Event</h2>
+
+<form method="post">
+  <label>Title:</label><br>
+  <input type="text" name="Title" required><br>
+
+  <label>Description:</label><br>
+  <textarea name="Description"></textarea><br>
+
+  <label>Start Time:</label><br>
+  <input type="datetime-local" name="StartTime" required><br>
+
+  <label>End Time:</label><br>
+  <input type="datetime-local" name="EndTime" required><br>
+
+  <label>Location:</label><br>
+  <input type="text" name="Location"><br>
+
+  <label>Created By:</label><br>
+  <select name="CreatedBy" required>
+    <option value="">Select user</option>
+    {% for user in users %}
+      <option value="{{ user.UserID }}">{{ user.Username }}</option>
+    {% endfor %}
+  </select><br>
+
+  <label>Event Type:</label><br>
+  <select name="EventType">
+    <option value="class">Class</option>
+    <option value="meeting">Meeting</option>
+    <option value="maintenance">Maintenance</option>
+    <option value="other">Other</option>
+  </select><br><br>
+
+  <button type="submit">Add Event</button>
+</form>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add Membership Plan</h2>
+  <form method="post">
+    <label>Plan Name:</label><br>
+    <input type="text" name="PlanName" required><br><br>
+
+    <label>Monthly Fee ($):</label><br>
+    <input type="number" step="0.01" name="MonthlyFee" required><br><br>
+
+    <label>Access Level:</label><br>
+    <input type="text" name="AccessLevel"><br><br>
+
+    <button type="submit">Add Plan</button>
+    <a href="{{ url_for('members.list_members') }}">Cancel</a>
+  </form>
+{% endblock %}

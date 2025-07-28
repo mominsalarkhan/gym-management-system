@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Class Schedule</h2>
+<a href="{{ url_for('rooms.create_schedule') }}">Add New Schedule</a>
+
+<table>
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Date</th>
+      <th>Start</th>
+      <th>End</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sched in schedules %}
+    <tr>
+      <td>{{ sched.ClassName }}</td>
+      <td>{{ sched.ScheduleDate }}</td>
+      <td>{{ sched.StartTime }}</td>
+      <td>{{ sched.EndTime }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add Membership History</h2>
+
+  <form method="POST">
+    <label for="MemberID">Member:</label><br>
+    <select name="MemberID" required>
+      <option value="">Select a member</option>
+      {% for m in members %}
+        <option value="{{ m.MemberID }}">{{ m.FirstName }} {{ m.LastName }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label for="PlanID">Plan:</label><br>
+    <select name="PlanID" required>
+      <option value="">Select a plan</option>
+      {% for p in plans %}
+        <option value="{{ p.PlanID }}">{{ p.PlanName }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label for="StartDate">Start Date:</label><br>
+    <input type="date" name="StartDate" required><br><br>
+
+    <label for="EndDate">End Date (optional):</label><br>
+    <input type="date" name="EndDate"><br><br>
+
+    <input type="submit" value="Add History">
+  </form>
+{% endblock %}

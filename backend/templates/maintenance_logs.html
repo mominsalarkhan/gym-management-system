@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Maintenance Logs</h2>
+
+  <a href="{{ url_for('maintenance.add_maintenance_log') }}">+ Add New Maintenance Log</a>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr>
+        <th>Log ID</th>
+        <th>Equipment ID</th>
+        <th>Reported By</th>
+        <th>Issue Description</th>
+        <th>Status</th>
+        <th>Resolution Notes</th>
+        <th>Resolved By</th>
+        <th>Resolve Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.LogID }}</td>
+        <td>{{ log.EquipmentID }}</td>
+        <td>{{ log.ReportedBy }}</td>
+        <td>{{ log.IssueDescription }}</td>
+        <td>{{ log.ResolutionStatus }}</td>
+        <td>{{ log.ResolutionNotes or '' }}</td>
+        <td>{{ log.ResolvedBy or '' }}</td>
+        <td>{{ log.ResolveDate or '' }}</td>
+        <td>
+          <a href="{{ url_for('maintenance.edit_maintenance_log', log_id=log.LogID) }}">Edit</a>
+          <form action="{{ url_for('maintenance.delete_maintenance_log_route', log_id=log.LogID) }}"
+                method="post"
+                style="display:inline;"
+                onsubmit="return confirm('Are you sure you want to delete log #{{ log.LogID }}?');">
+            <button type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

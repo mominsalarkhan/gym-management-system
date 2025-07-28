@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Report Maintenance Issue</h2>
+<form method="post">
+    <label>Equipment:
+        <select name="equipment_id">
+            {% for eq in equipment %}
+            <option value="{{ eq.EquipmentID }}">{{ eq.EquipmentName }}</option>
+            {% endfor %}
+        </select>
+    </label><br>
+    <label>Issue Description:<br>
+        <textarea name="issue_description" rows="4" cols="50"></textarea>
+    </label><br>
+    <button type="submit">Submit</button>
+</form>
+{% endblock %}

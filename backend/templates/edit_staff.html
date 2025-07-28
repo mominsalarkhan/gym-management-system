@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Edit Staff: {{ staff.FirstName }} {{ staff.LastName }}</h2>
+  <form method="post">
+    <label>First Name: <input type="text" name="first" value="{{ staff.FirstName }}" required></label><br>
+    <label>Last Name: <input type="text" name="last" value="{{ staff.LastName }}" required></label><br>
+    <label>Email: <input type="email" name="email" value="{{ staff.Email }}" required></label><br>
+    <label>Role: <input type="text" name="role" value="{{ staff.Role }}"></label><br>
+    <button type="submit">Update Staff</button>
+  </form>
+{% endblock %}

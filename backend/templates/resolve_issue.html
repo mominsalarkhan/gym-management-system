@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Resolve Maintenance Issue</h2>
+<form method="post">
+    <p><strong>Issue:</strong> {{ log.IssueDescription }}</p>
+    <p><strong>Status:</strong> {{ log.ResolutionStatus }}</p>
+    <label>Resolution Notes:<br>
+        <textarea name="resolution_notes" rows="4" cols="50"></textarea>
+    </label><br>
+    <label>Status:
+        <select name="resolution_status">
+            <option value="in_progress" {% if log.ResolutionStatus == 'in_progress' %}selected{% endif %}>In Progress</option>
+            <option value="resolved">Resolved</option>
+        </select>
+    </label><br>
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

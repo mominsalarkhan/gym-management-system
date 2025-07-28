@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Membership History</h2>
+
+  <a href="{{ url_for('members.add_membership_history', mid=member.MemberID) }}">Add History</a>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>History ID</th>
+      <th>Member</th>
+      <th>Plan</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+      <th>Actions</th>
+    </tr>
+    {% for record in history %}
+    <tr>
+      <td>{{ record.HistoryID }}</td>
+      <td>{{ record.FirstName }} {{ record.LastName }}</td>
+      <td>{{ record.PlanName }}</td>
+      <td>{{ record.StartDate }}</td>
+      <td>{{ record.EndDate or 'Ongoing' }}</td>
+      <td>
+        <a href="{{ url_for('members.edit_membership_history', hid=record.HistoryID) }}">Edit</a> |
+        <form method="post" action="{{ url_for('members.delete_membership_history', hid=record.HistoryID) }}" style="display:inline;" onsubmit="return confirm('Delete this history entry?');">
+          <button type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

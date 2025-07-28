@@ -3,12 +3,23 @@
   <h2>Members</h2>
   <a href="{{ url_for('members.add_member') }}">+ Add Member</a>
   <table border="1" cellpadding="5">
-    <tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Current Plan</th>
+      <th>Status</th>
+      <th>Start Date</th>
+      <th>Actions</th>
+    </tr>
     {% for m in members %}
     <tr>
       <td>{{ m.MemberID }}</td>
       <td>{{ m.FirstName }} {{ m.LastName }}</td>
       <td>{{ m.Email }}</td>
+      <td>{{ m.PlanName or 'N/A' }}</td>
+      <td>{{ m.MembershipStatus or 'N/A' }}</td>
+      <td>{{ m.MembershipStartDate or 'N/A' }}</td>
       <td>
         <a href="{{ url_for('members.edit_member', mid=m.MemberID) }}">Edit</a>
         <form method="post"

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Staff</h2>
+  <a href="{{ url_for('staff.add_staff') }}">+ Add New Staff</a>
+  <table border="1" cellpadding="5">
+    <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>
+    {% for s in staff %}
+    <tr>
+      <td>{{ s.StaffID }}</td>
+      <td>{{ s.FirstName }} {{ s.LastName }}</td>
+      <td>{{ s.Email }}</td>
+      <td>{{ s.Role }}</td>
+      <td>
+        <a href="{{ url_for('staff.edit_staff', sid=s.StaffID) }}">Edit</a>
+        <form method="post"
+              action="{{ url_for('staff.delete_staff', sid=s.StaffID) }}"
+              style="display:inline;"
+              onsubmit="return confirm('Really delete {{ s.FirstName }} {{ s.LastName }}?');">
+          <button type="submit">×</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Calendar Event</h2>
+<form method="post">
+    <label>Title: <input type="text" name="title" value="{{ event.Title }}"></label><br>
+    <label>Description: <textarea name="description">{{ event.Description }}</textarea></label><br>
+    <label>Start Time: <input type="datetime-local" name="start" value="{{ event.StartTime }}"></label><br>
+    <label>End Time: <input type="datetime-local" name="end" value="{{ event.EndTime }}"></label><br>
+    <label>Location: <input type="text" name="location" value="{{ event.Location }}"></label><br>
+    <label>Type:
+        <select name="event_type">
+            <option value="class" {% if event.EventType == 'class' %}selected{% endif %}>Class</option>
+            <option value="maintenance" {% if event.EventType == 'maintenance' %}selected{% endif %}>Maintenance</option>
+            <option value="meeting" {% if event.EventType == 'meeting' %}selected{% endif %}>Meeting</option>
+            <option value="other" {% if event.EventType == 'other' %}selected{% endif %}>Other</option>
+        </select>
+    </label><br>
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

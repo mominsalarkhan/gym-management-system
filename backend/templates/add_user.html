@@ -1,15 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Add User</h2>
+  <h2>Add New User</h2>
+
   <form method="post">
-    <label>Username:<br><input name="username" required></label><br>
-    <label>Password:<br><input type="password" name="password" required></label><br>
-    <label>Role:<br>
-      <select name="role">
-        {% for r in roles %}<option>{{ r }}</option>{% endfor %}
-      </select>
-    </label><br>
-    <button type="submit">Create</button>
+    <label>Username:</label><br>
+    <input type="text" name="username" required><br><br>
+
+    <label>Password:</label><br>
+    <input type="password" name="password" required><br><br>
+
+    <label>Role:</label><br>
+    <select name="role" required>
+      <option value="admin">Admin</option>
+      <option value="manager">Manager</option>
+      <option value="trainer">Trainer</option>
+      <option value="member">Member</option>
+    </select><br><br>
+
+    <button type="submit">Create User</button>
     <a href="{{ url_for('users.list_users') }}">Cancel</a>
   </form>
 {% endblock %}

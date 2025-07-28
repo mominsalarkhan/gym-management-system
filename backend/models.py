@@ -59,10 +59,23 @@ def update_user(uid, username, role):
     db.commit()
 
 def delete_user(uid):
-    db = get_db(); cur = db.cursor()
+    db = get_db(); cur = db.cursor(dictionary=True)
+
+    cur.execute("SELECT Role FROM `User` WHERE UserID=%s", (uid,))
+    user = cur.fetchone()
+    if not user:
+        return
+
+    if user["Role"] == "admin":
+        cur.execute("SELECT COUNT(*) AS count FROM `User` WHERE Role='admin'")
+        admin_count = cur.fetchone()["count"]
+        if admin_count <= 1:
+            raise Exception("Cannot delete the last admin user.")
+
+    cur = db.cursor()
     cur.execute("DELETE FROM `User` WHERE UserID=%s", (uid,))
     db.commit()
-
+    
 # ── MembershipPlan ──
 def get_all_plans():
     db = get_db(); cur = db.cursor(dictionary=True)
@@ -79,8 +92,30 @@ def create_plan(planName, monthlyFee, accessLevel=None):
 
 # ── Member ──
 def get_all_members():
-    db = get_db(); cur = db.cursor(dictionary=True)
-    cur.execute("SELECT * FROM Member")
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+    cur.execute("""
+        WITH RankedHistory AS (
+            SELECT *,
+                   ROW_NUMBER() OVER (PARTITION BY MemberID ORDER BY 
+                       CASE WHEN EndDate IS NULL THEN 0 ELSE 1 END, 
+                       StartDate DESC
+                   ) AS rn
+            FROM MembershipHistory
+        )
+        SELECT 
+            m.MemberID, m.FirstName, m.LastName, m.Email,
+            p.PlanName,
+            h.StartDate AS MembershipStartDate,
+            CASE 
+              WHEN h.EndDate IS NULL THEN 'active'
+              WHEN h.EndDate IS NOT NULL THEN 'inactive'
+              ELSE 'inactive'
+            END AS MembershipStatus
+        FROM Member m
+        LEFT JOIN RankedHistory h ON m.MemberID = h.MemberID AND h.rn = 1
+        LEFT JOIN MembershipPlan p ON h.PlanID = p.PlanID
+    """)
     return cur.fetchall()
 
 def get_member_by_id(mid):
@@ -284,17 +319,22 @@ def create_equipment(EquipmentName, PurchaseDate=None, Condition=None, RoomID=No
     db.commit()
 
 # ── Staff ──
-def get_all_staff():
+def get_staff_by_id(sid):
     db = get_db(); cur = db.cursor(dictionary=True)
-    cur.execute("SELECT * FROM Staff")
-    return cur.fetchall()
+    cur.execute("SELECT * FROM Staff WHERE StaffID=%s", (sid,))
+    return cur.fetchone()
 
-def create_staff(FirstName, LastName, Email, Role=None):
+def update_staff(sid, FirstName, LastName, Email, Role):
     db = get_db(); cur = db.cursor()
     cur.execute(
-      "INSERT INTO Staff (FirstName, LastName, Email, `Role`) VALUES (%s,%s,%s,%s)",
-      (FirstName, LastName, Email, Role)
+      "UPDATE Staff SET FirstName=%s, LastName=%s, Email=%s, `Role`=%s WHERE StaffID=%s",
+      (FirstName, LastName, Email, Role, sid)
     )
+    db.commit()
+
+def delete_staff(sid):
+    db = get_db(); cur = db.cursor()
+    cur.execute("DELETE FROM Staff WHERE StaffID=%s", (sid,))
     db.commit()
 
 # ── EquipmentMaintenance ──
@@ -315,3 +355,302 @@ def create_equipment_maintenance(EquipmentID, StaffID, MaintenanceDate, Maintena
       (EquipmentID, StaffID, MaintenanceDate, MaintenanceDescription)
     )
     db.commit()
+
+    # ── MaintenanceLog ──
+def get_all_maintenance_logs():
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM MaintenanceLog")
+    return cur.fetchall()
+
+def get_maintenance_log_by_id(log_id):
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM MaintenanceLog WHERE LogID = %s", (log_id,))
+    return cur.fetchone()
+
+def create_maintenance_log(EquipmentID, ReportedBy, IssueDescription, ResolutionStatus='pending'):
+    db = get_db(); cur = db.cursor()
+    cur.execute("""
+        INSERT INTO MaintenanceLog (
+            EquipmentID, ReportedBy, IssueDescription, ResolutionStatus
+        ) VALUES (%s, %s, %s, %s)
+    """, (EquipmentID, ReportedBy, IssueDescription, ResolutionStatus))
+    db.commit()
+
+def update_maintenance_resolution(log_id, ResolutionStatus, ResolutionNotes=None, ResolvedBy=None, ResolveDate=None):
+    db = get_db(); cur = db.cursor()
+    cur.execute("""
+        UPDATE MaintenanceLog
+        SET ResolutionStatus = %s,
+            ResolutionNotes = %s,
+            ResolvedBy = %s,
+            ResolveDate = %s
+        WHERE LogID = %s
+    """, (ResolutionStatus, ResolutionNotes, ResolvedBy, ResolveDate, log_id))
+    db.commit()
+
+    # ── CalendarEvent ──
+def get_all_events():
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM CalendarEvent")
+    return cur.fetchall()
+
+def get_event_by_id(event_id):
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM CalendarEvent WHERE EventID = %s", (event_id,))
+    return cur.fetchone()
+
+def create_calendar_event(Title, StartTime, EndTime, CreatedBy, Description=None, Location=None, EventType='other'):
+    db = get_db(); cur = db.cursor()
+    cur.execute("""
+        INSERT INTO CalendarEvent (
+            Title, Description, StartTime, EndTime,
+            Location, CreatedBy, EventType
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (Title, Description, StartTime, EndTime, Location, CreatedBy, EventType))
+    db.commit()
+
+def delete_event(event_id):
+    db = get_db(); cur = db.cursor()
+    cur.execute("DELETE FROM CalendarEvent WHERE EventID = %s", (event_id,))
+    db.commit()
+
+def get_all_staff():
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM Staff")
+    return cur.fetchall()
+
+def create_staff(FirstName, LastName, Email, Role):
+    db = get_db(); cur = db.cursor()
+    cur.execute(
+        "INSERT INTO Staff (FirstName, LastName, Email, Role) VALUES (%s, %s, %s, %s)",
+        (FirstName, LastName, Email, Role)
+    )
+    db.commit()
+
+def update_equipment(eid, EquipmentName, PurchaseDate, Condition, RoomID):
+    db = get_db()
+    cur = db.cursor()
+    cur.execute(
+        "UPDATE Equipment SET EquipmentName=%s, PurchaseDate=%s, `Condition`=%s, RoomID=%s WHERE EquipmentID=%s",
+        (EquipmentName, PurchaseDate, Condition, RoomID, eid)
+    )
+    db.commit()
+
+def delete_equipment(eid):
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("DELETE FROM Equipment WHERE EquipmentID=%s", (eid,))
+    db.commit()
+
+def get_equipment_by_id(eid):
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM Equipment WHERE EquipmentID = %s", (eid,))
+    return cur.fetchone()
+
+def get_class_by_id(cid):
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM FitnessClass WHERE ClassID=%s", (cid,))
+    return cur.fetchone()
+
+def update_fitness_class(cid, name, desc, capacity, room_id, trainer_id):
+    db = get_db(); cur = db.cursor()
+    cur.execute("""
+        UPDATE FitnessClass
+        SET ClassName=%s, ClassDescription=%s, Capacity=%s,
+            RoomID=%s, TrainerID=%s
+        WHERE ClassID=%s
+    """, (name, desc, capacity, room_id, trainer_id, cid))
+    db.commit()
+
+def delete_fitness_class(cid):
+    db = get_db(); cur = db.cursor()
+    cur.execute("DELETE FROM FitnessClass WHERE ClassID=%s", (cid,))
+    db.commit()
+
+def get_schedule_by_id(sid):
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM ClassSchedule WHERE ScheduleID = %s", (sid,))
+    return cur.fetchone()
+
+def update_class_schedule(sid, class_id, date, start, end):
+    db = get_db(); cur = db.cursor()
+    cur.execute("""
+        UPDATE ClassSchedule
+        SET ClassID = %s, ScheduleDate = %s, StartTime = %s, EndTime = %s
+        WHERE ScheduleID = %s
+    """, (class_id, date, start, end, sid))
+    db.commit()
+
+def delete_schedule(schedule_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM ClassSchedule WHERE ScheduleID = %s", (schedule_id,))
+    conn.commit()
+    cur.close()
+
+def get_all_class_schedules():
+    conn = get_db()
+    cur = conn.cursor(dictionary=True)
+    cur.execute("SELECT * FROM ClassSchedule")
+    schedules = cur.fetchall()
+    cur.close()
+    return schedules
+
+def get_all_attendance():
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM Attendance")
+    return cur.fetchall()
+
+def create_attendance(MemberID, ScheduleID, Status=None):
+    db = get_db(); cur = db.cursor()
+    cur.execute(
+      "INSERT INTO Attendance (MemberID, ScheduleID, Status) VALUES (%s,%s,%s)",
+      (MemberID, ScheduleID, Status)
+    )
+    db.commit()
+
+def get_attendance_by_id(attendance_id):
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM Attendance WHERE AttendanceID = %s", (attendance_id,))
+    return cur.fetchone()
+
+def update_attendance(attendance_id, member_id, schedule_id, status):
+    db = get_db(); cur = db.cursor()
+    cur.execute("""
+        UPDATE Attendance
+        SET MemberID = %s, ScheduleID = %s, Status = %s
+        WHERE AttendanceID = %s
+    """, (member_id, schedule_id, status, attendance_id))
+    db.commit()
+
+def delete_attendance(attendance_id):
+    db = get_db(); cur = db.cursor()
+    cur.execute("DELETE FROM Attendance WHERE AttendanceID = %s", (attendance_id,))
+    db.commit()
+
+def delete_maintenance_log(log_id):
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("DELETE FROM MaintenanceLog WHERE LogID = %s", (log_id,))
+    db.commit()
+
+def get_all_membership_plans():
+    cursor.execute("SELECT * FROM MembershipPlan")
+    return cursor.fetchall()
+
+def get_all_membership_plans():
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM MembershipPlan")
+    return cursor.fetchall()
+
+def add_membership_plan(name, fee, level):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO MembershipPlan (PlanName, MonthlyFee, AccessLevel) VALUES (%s, %s, %s)",
+        (name, fee, level)
+    )
+    db.commit()
+
+def update_member_plan(member_id, plan_id):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "UPDATE Member SET CurrentPlanID = %s, MembershipStartDate = CURDATE() WHERE MemberID = %s",
+        (plan_id, member_id)
+    )
+    db.commit()
+
+def record_membership_change(member_id, plan_id):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO MembershipHistory (MemberID, PlanID, StartDate) VALUES (%s, %s, CURDATE())",
+        (member_id, plan_id)
+    )
+    db.commit()
+
+def delete_plan(plan_id):
+    db = get_db(); cur = db.cursor()
+    cur.execute("DELETE FROM MembershipPlan WHERE PlanID = %s", (plan_id,))
+    db.commit()
+
+def add_membership_history(MemberID, PlanID, StartDate, EndDate=None):
+    db = get_db()
+    cur = db.cursor()
+    cur.execute(
+        "INSERT INTO MembershipHistory (MemberID, PlanID, StartDate, EndDate) VALUES (%s, %s, %s, %s)",
+        (MemberID, PlanID, StartDate, EndDate)
+    )
+    db.commit()
+
+def get_membership_history(member_id):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT h.*, p.PlanName, m.FirstName, m.LastName
+        FROM MembershipHistory h
+        JOIN MembershipPlan p ON h.PlanID = p.PlanID
+        JOIN Member m ON h.MemberID = m.MemberID
+        WHERE h.MemberID = %s
+        ORDER BY h.StartDate DESC
+    """, (member_id,))
+    return cursor.fetchall()
+
+def record_membership_change(member_id, plan_id):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO MembershipHistory (MemberID, PlanID, StartDate) VALUES (%s, %s, CURDATE())",
+        (member_id, plan_id)
+    )
+    db.commit()
+
+def delete_membership_history(history_id):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM MembershipHistory WHERE HistoryID = %s", (history_id,))
+    db.commit()
+
+def get_all_history():
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM MembershipHistory")
+    return cur.fetchall()
+
+def get_all_history():
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM MembershipHistory")
+    return cur.fetchall()
+
+def get_membership_history_by_id(hid):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT h.*, p.PlanName, m.FirstName, m.LastName
+        FROM MembershipHistory h
+        JOIN MembershipPlan p ON h.PlanID = p.PlanID
+        JOIN Member m ON h.MemberID = m.MemberID
+        WHERE h.HistoryID = %s
+    """, (hid,))
+    return cursor.fetchone()
+
+def get_member_id_by_history_id(hid):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT MemberID FROM MembershipHistory WHERE HistoryID = %s", (hid,))
+    row = cursor.fetchone()
+    return row[0] if row else None
+
+def get_user_by_username(username):
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM `User` WHERE Username=%s", (username,))
+    return cur.fetchone()  # returns dict
+
+def get_user_by_id(uid):
+    db = get_db(); cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM `User` WHERE UserID=%s", (uid,))
+    return cur.fetchone()  # returns dict

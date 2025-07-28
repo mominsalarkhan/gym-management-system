@@ -1,22 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Users</h2>
-  <a href="{{ url_for('users.add_user') }}">+ Add New User</a>
+  <h2>All Users</h2>
+
+  <p><a href="{{ url_for('users.add_user') }}">➕ Add New User</a></p>
+
   <table border="1" cellpadding="5">
-    <tr><th>ID</th><th>Username</th><th>Role</th><th>Actions</th></tr>
+    <tr>
+      <th>ID</th>
+      <th>Username</th>
+      <th>Role</th>
+      <th>Actions</th>
+    </tr>
+
     {% for u in users %}
     <tr>
       <td>{{ u.UserID }}</td>
       <td>{{ u.Username }}</td>
       <td>{{ u.Role }}</td>
       <td>
-        <a href="{{ url_for('users.edit_user', uid=u.UserID) }}">Edit</a>
-        <form method="post"
-              action="{{ url_for('users.delete_user', uid=u.UserID) }}"
-              style="display:inline;"
-              onsubmit="return confirm('Really delete user {{ u.Username }}?');">
-          <button type="submit">×</button>
-        </form>
+        <a href="{{ url_for('users.edit_user', uid=u.UserID) }}">✏️ Edit</a>
+
+        {% if users|length > 1 %}
+          <form method="post"
+                action="{{ url_for('users.delete_user', uid=u.UserID) }}"
+                style="display:inline;"
+                onsubmit="return confirm('Are you sure you want to delete user {{ u.Username }}?');">
+            <button type="submit">🗑️ Delete</button>
+          </form>
+        {% else %}
+          <em>Cannot delete last user</em>
+        {% endif %}
       </td>
     </tr>
     {% endfor %}

@@ -1,16 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Edit {{ user.Username }}</h2>
+  <h2>Edit User</h2>
+
   <form method="post">
-    <label>Username:<br><input name="username" value="{{ user.Username }}" required></label><br>
-    <label>Role:<br>
-      <select name="role">
-        {% for r in roles %}
-          <option {% if r==user.Role %}selected{% endif %}>{{ r }}</option>
-        {% endfor %}
-      </select>
-    </label><br>
-    <button type="submit">Save</button>
+    <label>Username:</label><br>
+    <input type="text" name="username" value="{{ user.Username }}" required><br><br>
+
+    <label>Role:</label><br>
+    <select name="role" required>
+      <option value="admin"   {% if user.Role == 'admin' %}selected{% endif %}>Admin</option>
+      <option value="manager" {% if user.Role == 'manager' %}selected{% endif %}>Manager</option>
+      <option value="trainer" {% if user.Role == 'trainer' %}selected{% endif %}>Trainer</option>
+      <option value="member"  {% if user.Role == 'member' %}selected{% endif %}>Member</option>
+    </select><br><br>
+
+    <button type="submit">Update User</button>
     <a href="{{ url_for('users.list_users') }}">Cancel</a>
   </form>
 {% endblock %}

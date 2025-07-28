@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Calendar View</h2>
+<a href="{{ url_for('calendar.add_event') }}">+ Add Event</a>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<table border="1" cellpadding="5">
+  <thead>
+    <tr>
+      <th>Event ID</th>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Start</th>
+      <th>End</th>
+      <th>Location</th>
+      <th>Created By</th>
+      <th>Type</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for event in events %}
+    <tr>
+      <td>{{ event.EventID }}</td>
+      <td>{{ event.Title }}</td>
+      <td>{{ event.Description }}</td>
+      <td>{{ event.StartTime }}</td>
+      <td>{{ event.EndTime }}</td>
+      <td>{{ event.Location }}</td>
+      <td>{{ event.CreatedBy }}</td>
+      <td>{{ event.EventType }}</td>
+      <td>
+        <form method="post" action="{{ url_for('calendar.delete_event_route', event_id=event.EventID) }}"
+              onsubmit="return confirm('Delete this event?');">
+          <button type="submit">×</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

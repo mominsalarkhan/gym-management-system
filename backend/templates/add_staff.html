@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add New Staff</h2>
+  <form method="post">
+    <label>First Name: <input type="text" name="first" required></label><br>
+    <label>Last Name: <input type="text" name="last" required></label><br>
+    <label>Email: <input type="email" name="email" required></label><br>
+    <label>Role: <input type="text" name="role" value="staff"></label><br>
+    <button type="submit">Create Staff</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add Class Schedule</h2>
+  <form method="post">
+    <label>Class:</label><br>
+    <select name="ClassID" required>
+      {% for cls in classes %}
+        <option value="{{ cls.ClassID }}">{{ cls.ClassName }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label>Date:</label><br>
+    <input type="date" name="ScheduleDate" required><br><br>
+
+    <label>Start Time:</label><br>
+    <input type="time" name="StartTime" required><br><br>
+
+    <label>End Time:</label><br>
+    <input type="time" name="EndTime" required><br><br>
+
+    <button type="submit">Add Schedule</button>
+    <a href="{{ url_for('classes.list_classes') }}">Cancel</a>
+  </form>
+{% endblock %}

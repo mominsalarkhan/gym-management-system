@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Attendance Record</h2>
+<form method="post">
+  <label>Member:</label>
+  <select name="MemberID">
+    {% for m in members %}
+      <option value="{{ m.MemberID }}" {% if attendance.MemberID == m.MemberID %}selected{% endif %}>
+        {{ m.FirstName }} {{ m.LastName }}
+      </option>
+    {% endfor %}
+  </select><br><br>
+
+  <label>Schedule:</label>
+  <select name="ScheduleID">
+    {% for s in schedules %}
+      <option value="{{ s.ScheduleID }}" {% if attendance.ScheduleID == s.ScheduleID %}selected{% endif %}>
+        Class {{ s.ClassID }} on {{ s.ScheduleDate }}
+      </option>
+    {% endfor %}
+  </select><br><br>
+
+  <label>Status:</label>
+  <select name="Status">
+    <option value="present" {% if attendance.Status == "present" %}selected{% endif %}>Present</option>
+    <option value="absent" {% if attendance.Status == "absent" %}selected{% endif %}>Absent</option>
+  </select><br><br>
+
+  <button type="submit">Update</button>
+</form>
+<a href="{{ url_for('classes.list_classes') }}">Cancel</a>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add Membership Plan</h2>
+
+  <form method="POST">
+    <label for="PlanName">Plan Name:</label><br>
+    <input type="text" name="PlanName" required><br><br>
+
+    <label for="MonthlyFee">Monthly Fee:</label><br>
+    <input type="number" name="MonthlyFee" step="0.01" required><br><br>
+
+    <label for="AccessLevel">Access Level:</label><br>
+    <input type="text" name="AccessLevel"><br><br>
+
+    <input type="submit" value="Add Plan">
+  </form>
+{% endblock %}

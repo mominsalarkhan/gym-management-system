@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Edit Fitness Class</h2>
+  <form method="post">
+    <label>Class Name:</label><br>
+    <input type="text" name="class_name" value="{{ class_data.ClassName }}" required><br><br>
+
+    <label>Description:</label><br>
+    <textarea name="description">{{ class_data.ClassDescription or '' }}</textarea><br><br>
+
+    <label>Capacity:</label><br>
+    <input type="number" name="capacity" value="{{ class_data.Capacity }}" required><br><br>
+
+    <label>Room ID:</label><br>
+    <input type="number" name="room_id" value="{{ class_data.RoomID }}" required><br><br>
+
+    <label>Trainer ID:</label><br>
+    <input type="number" name="trainer_id" value="{{ class_data.TrainerID }}" required><br><br>
+
+    <button type="submit">Update</button>
+    <a href="{{ url_for('classes.list_classes') }}">Cancel</a>
+  </form>
+{% endblock %}

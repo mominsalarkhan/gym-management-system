@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS Member (
   Email                VARCHAR(100)    NOT NULL UNIQUE,
   DateOfBirth          DATE,
   PhoneNumber          VARCHAR(20),
-  CurrentPlanID        INT,
+  CurrentPlanID        INT,w
   MembershipStatus     VARCHAR(20),
   MembershipStartDate  DATE,
   FOREIGN KEY (CurrentPlanID)
@@ -133,6 +133,33 @@ CREATE TABLE IF NOT EXISTS `User` (
   Username     VARCHAR(50)     NOT NULL UNIQUE,
   PasswordHash VARCHAR(128)    NOT NULL,
   Role         ENUM('admin','manager','trainer','member') NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS MaintenanceLog (
+    LogID INT AUTO_INCREMENT PRIMARY KEY,
+    EquipmentID INT NOT NULL,
+    ReportedBy INT NOT NULL,
+    IssueDescription TEXT NOT NULL,
+    ReportDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ResolutionStatus ENUM('pending', 'in_progress', 'resolved') DEFAULT 'pending',
+    ResolutionNotes TEXT,
+    ResolvedBy INT,
+    ResolveDate DATETIME,
+    FOREIGN KEY (EquipmentID) REFERENCES Equipment(EquipmentID),
+    FOREIGN KEY (ReportedBy) REFERENCES User(UserID),
+    FOREIGN KEY (ResolvedBy) REFERENCES User(UserID)
+);
+
+CREATE TABLE IF NOT EXISTS CalendarEvent (
+    EventID INT AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(255) NOT NULL,
+    Description TEXT,
+    StartTime DATETIME NOT NULL,
+    EndTime DATETIME NOT NULL,
+    Location VARCHAR(255),
+    CreatedBy INT NOT NULL,
+    EventType ENUM('class', 'maintenance', 'meeting', 'other') DEFAULT 'other',
+    FOREIGN KEY (CreatedBy) REFERENCES User(UserID)
 );
 
 SET FOREIGN_KEY_CHECKS=1;

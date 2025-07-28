@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Edit Membership History</h2>
+
+  <form method="post">
+    <label for="PlanID">Plan:</label><br>
+    <select name="PlanID" required>
+      {% for plan in plans %}
+        <option value="{{ plan.PlanID }}"
+          {% if history.PlanID == plan.PlanID %}selected{% endif %}>
+          {{ plan.PlanName }} - ${{ plan.MonthlyFee }}
+        </option>
+      {% endfor %}
+    </select><br><br>
+
+    <label for="StartDate">Start Date:</label><br>
+    <input type="date" name="StartDate" value="{{ history.StartDate }}" required><br><br>
+
+    <label for="EndDate">End Date (optional):</label><br>
+    <input type="date" name="EndDate" value="{{ history.EndDate }}"><br><br>
+
+    <button type="submit">Update</button>
+    <a href="{{ url_for('members.view_membership_history', mid=history.MemberID) }}">Cancel</a>
+  </form>
+{% endblock %}

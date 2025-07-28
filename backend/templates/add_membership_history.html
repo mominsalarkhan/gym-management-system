@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add Membership History</h2>
+  <form method="post">
+
+    <label>Member:</label><br>
+    <select name="MemberID" required>
+      <option value="">Select a member</option>
+      {% for m in members %}
+        <option value="{{ m.MemberID }}"
+          {% if request.form.get('MemberID') and request.form.get('MemberID')|int == m.MemberID %}
+            selected
+          {% elif member and m.MemberID == member.MemberID %}
+            selected
+          {% endif %}>
+          {{ m.FirstName }} {{ m.LastName }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <label>Plan:</label><br>
+    <select name="PlanID" required>
+      {% for plan in plans %}
+        <option value="{{ plan.PlanID }}">{{ plan.PlanName }} - ${{ plan.MonthlyFee }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label>Start Date:</label><br>
+    <input type="date" name="StartDate" required><br><br>
+
+    <label>End Date (optional):</label><br>
+    <input type="date" name="EndDate"><br><br>
+
+    <button type="submit">Add History</button>
+    <a href="{{ url_for('members.view_membership_history', mid=member.MemberID) }}">Cancel</a>
+  </form>
+{% endblock %}

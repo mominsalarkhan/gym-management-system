@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Edit Class Schedule</h2>
+  <form method="post">
+    <label>Class:</label><br>
+    <select name="class_id" required>
+      {% for cls in classes %}
+        <option value="{{ cls.ClassID }}" {% if cls.ClassID == sched.ClassID %}selected{% endif %}>
+          {{ cls.ClassName }}
+        </option>
+      {% endfor %}
+    </select><br><br>
+
+    <label>Date:</label><br>
+    <input type="date" name="schedule_date" value="{{ sched.ScheduleDate }}" required><br><br>
+
+    <label>Start Time:</label><br>
+    <input type="time" name="start_time" value="{{ sched.StartTime }}" required><br><br>
+
+    <label>End Time:</label><br>
+    <input type="time" name="end_time" value="{{ sched.EndTime }}" required><br><br>
+
+    <button type="submit">Update</button>
+    <a href="{{ url_for('classes.list_classes') }}">Cancel</a>
+  </form>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Edit Maintenance Log</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="post">
+    <label>Log ID:</label><br>
+    <input type="text" value="{{ log.LogID }}" readonly><br><br>
+
+    <label>Equipment ID:</label><br>
+    <input type="text" name="EquipmentID" value="{{ log.EquipmentID }}" readonly><br><br>
+
+    <label>Reported By:</label><br>
+    <input type="text" name="ReportedBy" value="{{ log.ReportedBy }}" readonly><br><br>
+
+    <label>Issue Description:</label><br>
+    <textarea name="IssueDescription" readonly>{{ log.IssueDescription }}</textarea><br><br>
+
+    <label>Resolution Status:</label><br>
+    <select name="ResolutionStatus" required>
+      <option value="pending" {% if log.ResolutionStatus == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="resolved" {% if log.ResolutionStatus == 'resolved' %}selected{% endif %}>Resolved</option>
+      <option value="in_progress" {% if log.ResolutionStatus == 'in_progress' %}selected{% endif %}>In Progress</option>
+    </select><br><br>
+
+    <label>Resolution Notes:</label><br>
+    <textarea name="ResolutionNotes">{{ log.ResolutionNotes or '' }}</textarea><br><br>
+
+    <label>Resolved By:</label><br>
+    <select name="ResolvedBy">
+      <option value="">Select a user</option>
+      {% for user in users %}
+        <option value="{{ user.UserID }}"
+          {% if user.UserID == log.ResolvedBy %}selected{% endif %}>
+          {{ user.Username }}
+        </option>
+      {% endfor %}
+    </select><br><br>
+
+    <label>Resolve Date:</label><br>
+    <input type="date" name="ResolveDate" value="{{ log.ResolveDate|default('', true) }}"><br><br>
+
+    <button type="submit">Update Log</button>
+    <a href="{{ url_for('maintenance.get_logs') }}">Cancel</a>
+  </form>
+{% endblock %}

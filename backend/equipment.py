@@ -29,21 +29,27 @@ def add_equipment():
     rooms = models.get_all_rooms()
     return render_template("add_equipment.html", rooms=rooms)
 
-@equipment_bp.route("/edit/<int:eid>", methods=["GET","POST"])
+@equipment_bp.route("/edit/<int:eid>", methods=["GET", "POST"])
 @login_required
-@roles_required("admin","manager")
+@roles_required("admin", "manager")
 def edit_equipment(eid):
     if request.method == "POST":
+        equipment_name = request.form.get("equipmentName")
+        purchase_date = request.form.get("purchaseDate")
+        condition = request.form.get("condition")
+        room_id = request.form.get("roomID")
+
         models.update_equipment(
-          eid,
-          request.form["equipmentName"],
-          request.form["purchaseDate"],
-          request.form["condition"],
-          request.form["roomID"]
+            eid,
+            equipment_name,
+            purchase_date,
+            condition,
+            room_id
         )
         flash("Equipment updated.", "success")
         return redirect(url_for("equipment.list_equipment"))
-    item  = models.get_equipment_by_id(eid)
+
+    item = models.get_equipment_by_id(eid)
     rooms = models.get_all_rooms()
     return render_template("edit_equipment.html", equipment=item, rooms=rooms)
 

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add Maintenance Log</h2>
+  <form method="post">
+    <label>Equipment:</label><br>
+    <select name="EquipmentID" required>
+      <option value="">Select equipment</option>
+      {% for item in equipment %}
+        <option value="{{ item.EquipmentID }}">{{ item.EquipmentName }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label>Reported By:</label><br>
+    <select name="ReportedBy" required>
+      <option value="">Select a user</option>
+      {% for user in users %}
+        <option value="{{ user.UserID }}">{{ user.Username }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label>Issue Description:</label><br>
+    <textarea name="IssueDescription" required></textarea><br><br>
+
+    <button type="submit">Add Log</button>
+    <a href="{{ url_for('maintenance.get_logs') }}">Cancel</a>
+  </form>
+{% endblock %}

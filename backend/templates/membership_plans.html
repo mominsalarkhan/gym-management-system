@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Membership Plans</h2>
+
+  <a href="{{ url_for('members.add_membership_plan') }}">+ Add New Plan</a>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>Plan ID</th>
+      <th>Name</th>
+      <th>Monthly Fee</th>
+      <th>Access Level</th>
+      <th>Actions</th>
+    </tr>
+    {% for plan in plans %}
+    <tr>
+      <td>{{ plan.PlanID }}</td>
+      <td>{{ plan.PlanName }}</td>
+      <td>${{ plan.MonthlyFee }}</td>
+      <td>{{ plan.AccessLevel }}</td>
+      <td>
+        <form method="POST" action="{{ url_for('members.delete_membership_plan', pid=plan.PlanID) }}" style="display:inline;" onsubmit="return confirm('Delete plan {{ plan.PlanName }}?');">
+          <button type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}
