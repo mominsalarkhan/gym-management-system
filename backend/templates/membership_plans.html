@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Membership Plans</h2>
+  <div class="section">
+    <div class="page-header">
+      <h2>Membership Plans</h2>
+      <a href="{{ url_for('members.add_membership_plan') }}" class="add-btn">Add New Plan</a>
+    </div>
 
-  <a href="{{ url_for('members.add_membership_plan') }}">+ Add New Plan</a>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -12,7 +15,7 @@
     {% endif %}
   {% endwith %}
 
-  <table border="1" cellpadding="5">
+  <table class="table-container">
     <tr>
       <th>Plan ID</th>
       <th>Name</th>
@@ -27,9 +30,11 @@
       <td>${{ plan.MonthlyFee }}</td>
       <td>{{ plan.AccessLevel }}</td>
       <td>
+        <div class="table-actions"> 
         <form method="POST" action="{{ url_for('members.delete_membership_plan', pid=plan.PlanID) }}" style="display:inline;" onsubmit="return confirm('Delete plan {{ plan.PlanName }}?');">
-          <button type="submit">Delete</button>
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
         </form>
+        </div>
       </td>
     </tr>
     {% endfor %}

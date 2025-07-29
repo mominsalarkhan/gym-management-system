@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Maintenance Logs</h2>
+  <div class="section">
+    <div class="page-header">
+      <h2>Maintenance Logs</h2>
+      <a href="{{ url_for('maintenance.add_maintenance_log') }}" class="add-btn">Add New Maintenance Log</a>
+    </div>
 
-  <a href="{{ url_for('maintenance.add_maintenance_log') }}">+ Add New Maintenance Log</a>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -12,7 +15,7 @@
     {% endif %}
   {% endwith %}
 
-  <table border="1" cellpadding="5">
+  <table class="table-container" border="1" cellpadding="5">
     <thead>
       <tr>
         <th>Log ID</th>
@@ -38,13 +41,15 @@
         <td>{{ log.ResolvedBy or '' }}</td>
         <td>{{ log.ResolveDate or '' }}</td>
         <td>
-          <a href="{{ url_for('maintenance.edit_maintenance_log', log_id=log.LogID) }}">Edit</a>
+          <div class="table-actions">
+          <a href="{{ url_for('maintenance.edit_maintenance_log', log_id=log.LogID) }}" class="btn btn-secondary btn-sm">Edit</a>
           <form action="{{ url_for('maintenance.delete_maintenance_log_route', log_id=log.LogID) }}"
                 method="post"
                 style="display:inline;"
                 onsubmit="return confirm('Are you sure you want to delete log #{{ log.LogID }}?');">
-            <button type="submit">Delete</button>
-          </form>
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </div>
         </td>
       </tr>
       {% endfor %}

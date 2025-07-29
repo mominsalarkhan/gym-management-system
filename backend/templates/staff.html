@@ -1,25 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Staff</h2>
-  <a href="{{ url_for('staff.add_staff') }}">+ Add New Staff</a>
-  <table border="1" cellpadding="5">
-    <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>
-    {% for s in staff %}
-    <tr>
-      <td>{{ s.StaffID }}</td>
-      <td>{{ s.FirstName }} {{ s.LastName }}</td>
-      <td>{{ s.Email }}</td>
-      <td>{{ s.Role }}</td>
-      <td>
-        <a href="{{ url_for('staff.edit_staff', sid=s.StaffID) }}">Edit</a>
-        <form method="post"
-              action="{{ url_for('staff.delete_staff', sid=s.StaffID) }}"
-              style="display:inline;"
-              onsubmit="return confirm('Really delete {{ s.FirstName }} {{ s.LastName }}?');">
-          <button type="submit">×</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
+  <div class="page-header">
+    <h2>Staff</h2>
+    <a href="{{ url_for('staff.add_staff') }}" class="add-btn">Add Staff</a>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Hire Date</th>
+          <th>Phone</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in staff %}
+        <tr>
+          <td>{{ s.StaffID }}</td>
+          <td>{{ s.FirstName }} {{ s.LastName }}</td>
+          <td>{{ s.Department }}</td>
+          <td>{{ s.HireDate }}</td>
+          <td>{{ s.PhoneNumber }}</td>
+          <td>
+            <div class="table-actions">
+              <a href="{{ url_for('staff.edit_staff', sid=s.StaffID) }}" class="btn btn-secondary btn-sm">Edit</a>
+              <form method="post"
+                    action="{{ url_for('staff.delete_staff', sid=s.StaffID) }}"
+                    onsubmit="return confirm('Delete staff {{ s.FirstName }} {{ s.LastName }}?');">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

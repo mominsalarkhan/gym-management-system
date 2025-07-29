@@ -1,18 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Add Equipment</h2>
-  <form method="post">
-    <label>Name:<br><input name="equipmentName" required></label><br>
-    <label>Purchase Date:<br><input type="date" name="purchaseDate" required></label><br>
-    <label>Condition:<br><input name="condition" required></label><br>
-    <label>Room:<br>
-      <select name="roomID">
-        {% for r in rooms %}
-          <option value="{{ r.RoomID }}">{{ r.RoomName }}</option>
-        {% endfor %}
-      </select>
-    </label><br>
-    <button type="submit">Create</button>
-    <a href="{{ url_for('equipment.list_equipment') }}">Cancel</a>
-  </form>
+  <div class="page-header">
+    <h2>Add Equipment</h2>
+    <a href="{{ url_for('equipment.list_equipment') }}" class="back-btn">Back to Equipment</a>
+  </div>
+
+  <div class="card">
+    <form method="post">
+      <div class="form-group">
+        <label class="form-label">Equipment Name:</label>
+        <input name="equipmentName" class="form-input" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Purchase Date:</label>
+        <input type="date" name="purchaseDate" class="form-input" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Condition:</label>
+        <select name="condition" class="form-select" required>
+          <option value="">Select condition...</option>
+          <option value="New">New</option>
+          <option value="Good">Good</option>
+          <option value="Fair">Fair</option>
+          <option value="Poor">Poor</option>
+          <option value="Needs Repair">Needs Repair</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Room ID:</label>
+        <input name="roomID" class="form-input" required>
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">Add Equipment</button>
+        <a href="{{ url_for('equipment.list_equipment') }}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
 {% endblock %}

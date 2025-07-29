@@ -1,28 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Equipment</h2>
-  <a href="{{ url_for('equipment.add_equipment') }}">+ Add Equipment</a>
-  <table border="1" cellpadding="5">
-    <tr>
-      <th>ID</th><th>Name</th><th>Purchased</th><th>Condition</th><th>Room</th><th>Actions</th>
-    </tr>
-    {% for e in equipment %}
-    <tr>
-      <td>{{ e.EquipmentID }}</td>
-      <td>{{ e.EquipmentName }}</td>
-      <td>{{ e.PurchaseDate }}</td>
-      <td>{{ e.Condition }}</td>
-      <td>{{ e.RoomID }}</td>
-      <td>
-        <a href="{{ url_for('equipment.edit_equipment', eid=e.EquipmentID) }}">Edit</a>
-        <form method="post"
-              action="{{ url_for('equipment.delete_equipment', eid=e.EquipmentID) }}"
-              style="display:inline;"
-              onsubmit="return confirm('Delete {{ e.EquipmentName }}?');">
-          <button type="submit">×</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
+  <div class="page-header">
+    <h2>Equipment</h2>
+    <a href="{{ url_for('equipment.add_equipment') }}" class="add-btn">Add Equipment</a>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Purchased</th>
+          <th>Condition</th>
+          <th>Room</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in equipment %}
+        <tr>
+          <td>{{ e.EquipmentID }}</td>
+          <td>{{ e.EquipmentName }}</td>
+          <td>{{ e.PurchaseDate }}</td>
+          <td>{{ e.Condition }}</td>
+          <td>{{ e.RoomID }}</td>
+          <td>
+            <div class="table-actions">
+              <a href="{{ url_for('equipment.edit_equipment', eid=e.EquipmentID) }}" class="btn btn-secondary btn-sm">Edit</a>
+              <form method="post"
+                    action="{{ url_for('equipment.delete_equipment', eid=e.EquipmentID) }}"
+                    onsubmit="return confirm('Delete {{ e.EquipmentName }}?');">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

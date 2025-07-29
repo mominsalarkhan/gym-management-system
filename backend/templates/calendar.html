@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Calendar View</h2>
-<a href="{{ url_for('calendar.add_event') }}">+ Add Event</a>
+  <div class="section">
+    <div class="page-header">
+      <h2>Calendar View</h2>
+      <a href="{{ url_for('calendar.add_event') }}" class="add-btn">Add Event</a>
+    </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -11,7 +14,7 @@
   {% endif %}
 {% endwith %}
 
-<table border="1" cellpadding="5">
+<table class="table-container">
   <thead>
     <tr>
       <th>Event ID</th>
@@ -37,10 +40,12 @@
       <td>{{ event.CreatedBy }}</td>
       <td>{{ event.EventType }}</td>
       <td>
+        <div class="table-actions">
         <form method="post" action="{{ url_for('calendar.delete_event_route', event_id=event.EventID) }}"
               onsubmit="return confirm('Delete this event?');">
-          <button type="submit">×</button>
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
         </form>
+        </div>
       </td>
     </tr>
     {% endfor %}

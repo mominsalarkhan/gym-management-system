@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Rooms</h2>
-  <a href="{{ url_for('rooms.add_room') }}">+ Add Room</a>
-  <table border="1" cellpadding="5">
+  <div class="section">
+    <div class="page-header">
+      <h2>Rooms</h2>
+      <a href="{{ url_for('rooms.add_room') }}" class="add-btn">Add Room</a>
+    </div>
+    
+  <table class="table-container">
     <tr><th>ID</th><th>Name</th><th>Capacity</th><th>Actions</th></tr>
     {% for r in rooms %}
     <tr>
@@ -10,13 +14,15 @@
       <td>{{ r.RoomName }}</td>
       <td>{{ r.Capacity }}</td>
       <td>
-        <a href="{{ url_for('rooms.edit_room', rid=r.RoomID) }}">Edit</a>
+        <div class="table-actions">
+        <a href="{{ url_for('rooms.edit_room', rid=r.RoomID) }}" class="btn btn-secondary btn-sm">Edit</a>
         <form method="post"
               action="{{ url_for('rooms.delete_room', rid=r.RoomID) }}"
               style="display:inline;"
               onsubmit="return confirm('Delete room {{ r.RoomName }}?');">
-          <button type="submit">×</button>
-        </form>
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </div>
       </td>
     </tr>
     {% endfor %}

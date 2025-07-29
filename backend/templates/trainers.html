@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Trainers</h2>
-  <a href="{{ url_for('trainers.add_trainer') }}">+ Add Trainer</a>
-  <table border="1" cellpadding="5">
+  <div class="section">
+    <div class="page-header">
+      <h2>Trainers</h2>
+      <a href="{{ url_for('trainers.add_trainer') }}" class="add-btn">Add Trainer</a>
+    </div>
+
+  <table class="table-container">
     <tr><th>ID</th><th>Name</th><th>Specialty</th><th>Actions</th></tr>
     {% for t in trainers %}
     <tr>
@@ -10,13 +14,15 @@
       <td>{{ t.FirstName }} {{ t.LastName }}</td>
       <td>{{ t.Specialty }}</td>
       <td>
-        <a href="{{ url_for('trainers.edit_trainer', tid=t.TrainerID) }}">Edit</a>
+        <div class="table-actions">
+        <a href="{{ url_for('trainers.edit_trainer', tid=t.TrainerID) }}" class="btn btn-secondary btn-sm">Edit</a>
         <form method="post"
               action="{{ url_for('trainers.delete_trainer', tid=t.TrainerID) }}"
               style="display:inline;"
               onsubmit="return confirm('Delete trainer {{ t.FirstName }} {{ t.LastName }}?');">
-          <button type="submit">×</button>
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
         </form>
+        </div>
       </td>
     </tr>
     {% endfor %}
