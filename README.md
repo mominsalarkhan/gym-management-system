@@ -65,6 +65,20 @@ The schema is structured around real-world gym operations, with attention to **d
 
 ---
 
+## Deploying with Docker 🐋
+
+### For easy replication and testing, we have built a docker-compose
+
+```bash
+docker compose up -d --build
+```
+
+Wait for the build to finish. The backend will wait for MySQL to be online and then it will start.
+
+Go to http://localhost:5001/ and login.
+
+---
+
 ## ✨ Features
 
 - 🔐 User authentication & role-based access
@@ -88,6 +102,17 @@ The schema is structured around real-world gym operations, with attention to **d
 * Richard Tairouz Aslam
 
 ---
+
+Overwrite admin pw if needed:
+```sql
+docker exec -it mysql_db mysql -u root -p
+
+USE gymdb;
+
+
+UPDATE User SET PasswordHash = 'pbkdf2:sha256:1000000$mLoVr6hMU2L81RPA$0795aa10cc0ded229fe0acee370d961e2a23336b3198d4ad526acd984358cabd' WHERE Username = 'admin';
+```
+
 
 ## 📎 License
 
