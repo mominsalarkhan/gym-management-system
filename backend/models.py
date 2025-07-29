@@ -95,26 +95,13 @@ def get_all_members():
     db = get_db()
     cur = db.cursor(dictionary=True)
     cur.execute("""
-        WITH RankedHistory AS (
-            SELECT *,
-                   ROW_NUMBER() OVER (PARTITION BY MemberID ORDER BY 
-                       CASE WHEN EndDate IS NULL THEN 0 ELSE 1 END, 
-                       StartDate DESC
-                   ) AS rn
-            FROM MembershipHistory
-        )
         SELECT 
             m.MemberID, m.FirstName, m.LastName, m.Email,
-            p.PlanName,
-            h.StartDate AS MembershipStartDate,
-            CASE 
-              WHEN h.EndDate IS NULL THEN 'active'
-              WHEN h.EndDate IS NOT NULL THEN 'inactive'
-              ELSE 'inactive'
-            END AS MembershipStatus
+            m.MembershipStartDate,
+            m.MembershipStatus,
+            p.PlanName
         FROM Member m
-        LEFT JOIN RankedHistory h ON m.MemberID = h.MemberID AND h.rn = 1
-        LEFT JOIN MembershipPlan p ON h.PlanID = p.PlanID
+        LEFT JOIN MembershipPlan p ON m.CurrentPlanID = p.PlanID
     """)
     return cur.fetchall()
 
@@ -147,11 +134,27 @@ def create_member(
     )
     db.commit()
 
-def update_member(mid, firstName, lastName, email):
+def update_member(
+    mid, firstName, lastName, email,
+    DateOfBirth=None, PhoneNumber=None,
+    CurrentPlanID=None, MembershipStatus=None,
+    MembershipStartDate=None
+):
     db = get_db(); cur = db.cursor()
     cur.execute(
-      "UPDATE Member SET FirstName=%s, LastName=%s, Email=%s WHERE MemberID=%s",
-      (firstName, lastName, email, mid)
+      """
+      UPDATE Member SET 
+        FirstName=%s, LastName=%s, Email=%s,
+        DateOfBirth=%s, PhoneNumber=%s,
+        CurrentPlanID=%s, MembershipStatus=%s, MembershipStartDate=%s
+      WHERE MemberID=%s
+      """,
+      (
+        firstName, lastName, email,
+        DateOfBirth, PhoneNumber,
+        CurrentPlanID, MembershipStatus,
+        MembershipStartDate, mid
+      )
     )
     db.commit()
 
