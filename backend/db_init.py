@@ -3,6 +3,7 @@ import mysql.connector
 from mysql.connector import Error
 import logging
 from datetime import date, timedelta, datetime
+from werkzeug.security import generate_password_hash
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -342,18 +343,16 @@ def insert_sample_data():
                 [(1, 1, "Lubricated belt", today), (2, 2, "Seat adjustment", today)]
             )
 
-            # User
-            cursor.executemany(
-                "INSERT INTO `User` (Username, PasswordHash, Role) VALUES (%s, %s, %s)",
-                [("admin", "hash1", "admin"), ("trainer1", "hash2", "trainer")]
-            )
+            # Get the default admin UserID
+            cursor.execute("SELECT UserID FROM `User` WHERE Username = %s", (os.getenv("ADMIN_USER", "admin"),))
+            admin_id = cursor.fetchone()[0]
 
             # MaintenanceLog
             cursor.executemany(
                 "INSERT INTO MaintenanceLog (EquipmentID, ReportedBy, IssueDescription, ResolutionStatus) VALUES (%s, %s, %s, %s)",
-                [(1, 1, "Overheating motor", "pending"), (2, 2, "Loose bolts", "resolved")]
+                [(1, admin_id, "Overheating motor", "pending"), (2, admin_id, "Loose bolts", "resolved")]
             )
-
+            
             # CalendarEvent
             cursor.executemany(
                 "INSERT INTO CalendarEvent (Title, Description, StartTime, EndTime, Location, CreatedBy, EventType) VALUES (%s, %s, %s, %s, %s, %s, %s)",
@@ -380,9 +379,12 @@ def initialize_database():
         # Step 2: Create tables
         create_tables()
         
-        # Step 3: Insert sample data
+        # Step 3: Ensure admin user if none exist
+        create_default_admin()
+
+        # Step 4: Insert sample data
         insert_sample_data()
-        
+
         logger.info("Database initialization completed successfully!")
         
     except Error as e:
@@ -406,6 +408,34 @@ def check_database_exists():
         
     except Error:
         return False
+    
+def create_default_admin():
+    """Creates a default admin user if no users exist."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT COUNT(*) FROM `User`")
+        count = cursor.fetchone()[0]
+
+        if count == 0:
+            admin_username = os.getenv("ADMIN_USER", "admin")
+            admin_password = os.getenv("ADMIN_PASS", "admin")
+            hashed = generate_password_hash(admin_password, method="pbkdf2:sha256")
+            cursor.execute(
+                "INSERT INTO `User` (Username, PasswordHash, Role) VALUES (%s, %s, %s)",
+                (admin_username, hashed, "admin")
+            )
+            conn.commit()
+            logger.info(f"✅ Default admin user '{admin_username}' created.")
+        else:
+            logger.info("🔒 Users already exist. Skipping admin creation.")
+
+        cursor.close()
+        conn.close()
+    except Error as e:
+        logger.error(f"❌ Error creating default admin: {e}")
+        raise
 
 if __name__ == "__main__":
-    initialize_database() 
+    initialize_database()
