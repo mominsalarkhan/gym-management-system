@@ -9,24 +9,23 @@
   {% if current_user.is_authenticated %}
   <nav>
     <ul>
-<ul>
-  <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-  <li><a href="{{ url_for('users.list_users') }}">Users</a></li>
-  <li><a href="{{ url_for('members.list_members') }}">Members</a></li>
-  <li><a href="{{ url_for('members.list_membership_plans') }}">Membership Plans</a></li>
-  <li><a href="{{ url_for('membership.view_history') }}">Membership History</a></li>
-  <li><a href="{{ url_for('trainers.list_trainers') }}">Trainers</a></li>
-  <li><a href="{{ url_for('rooms.list_rooms') }}">Rooms</a></li>
-  <li><a href="{{ url_for('equipment.list_equipment') }}">Equipment</a></li>
-  <li><a href="{{ url_for('classes.list_classes') }}">Classes</a></li>
-  <li><a href="{{ url_for('staff.list_staff') }}">Staff</a></li>
-  <li><a href="{{ url_for('maintenance.get_logs') }}">Maintenance Logs</a></li>
-  <li><a href="{{ url_for('calendar.calendar_view') }}">Calendar</a></li>
-  <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
-  <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
-</ul>
+      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('users.list_users') }}">Users</a></li>
+      <li><a href="{{ url_for('members.list_members') }}">Members</a></li>
+      <li><a href="{{ url_for('members.list_membership_plans') }}">Membership Plans</a></li>
+      <li><a href="{{ url_for('membership.view_history') }}">Membership History</a></li>
+      <li><a href="{{ url_for('trainers.list_trainers') }}">Trainers</a></li>
+      <li><a href="{{ url_for('rooms.list_rooms') }}">Rooms</a></li>
+      <li><a href="{{ url_for('equipment.list_equipment') }}">Equipment</a></li>
+      <li><a href="{{ url_for('classes.list_classes') }}">Classes</a></li>
+      <li><a href="{{ url_for('staff.list_staff') }}">Staff</a></li>
+      <li><a href="{{ url_for('maintenance.get_logs') }}">Maintenance Logs</a></li>
+      <li><a href="{{ url_for('calendar.calendar_view') }}">Calendar</a></li>
+      <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
+      <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
     </ul>
   </nav>
+  
   <hr>
   {% endif %}
 

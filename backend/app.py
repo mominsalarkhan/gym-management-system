@@ -24,11 +24,7 @@ import classes
 import staff
 
 # ── Flask App Setup ──
-app = Flask(
-    __name__,
-    static_folder=os.path.join(os.path.dirname(__file__), "../frontend"),
-    static_url_path=""
-)
+app = Flask(__name__)
 app.config.from_prefixed_env()
 app.secret_key = os.getenv("SECRET_KEY")
 
@@ -94,4 +90,4 @@ def dashboard():
 # ── Entry Point ──
 if __name__ == "__main__":
     ensure_database_and_admin()
-    app.run(port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
