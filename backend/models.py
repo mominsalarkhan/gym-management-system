@@ -1,5 +1,6 @@
 import os
 import mysql.connector
+from flask import flash
 from flask_login import UserMixin
 
 from werkzeug.security import generate_password_hash
@@ -237,10 +238,20 @@ def update_room(rid, RoomName, Capacity):
     db.commit()
 
 def delete_room(rid):
-    db = get_db(); cur = db.cursor()
-    cur.execute("DELETE FROM Room WHERE RoomID=%s", (rid,))
-    db.commit()
-
+    db = get_db()
+    cur = db.cursor()
+    try:
+        cur.execute("DELETE FROM Room WHERE RoomID = %s", (rid,))
+        db.commit()
+    except mysql.connector.IntegrityError as e:
+        if e.errno == 1451:
+            flash("Cannot delete this room because it is assigned to one or more fitness classes.", "error")
+        else:
+            flash(f"Database error: {str(e)}", "error")
+    finally:
+        cur.close()
+        db.close()
+        
 # ── FitnessClass ──
 def get_all_classes():
     db = get_db(); cur = db.cursor(dictionary=True)
@@ -665,4 +676,14 @@ def delete_membership_plan(plan_id):
     db = get_db()
     cur = db.cursor()
     cur.execute("DELETE FROM MembershipPlan WHERE PlanID = %s", (plan_id,))
+    db.commit()
+
+def update_membership_history(hid, plan_id, start_date, end_date=None):
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("""
+        UPDATE MembershipHistory
+        SET PlanID = %s, StartDate = %s, EndDate = %s
+        WHERE HistoryID = %s
+    """, (plan_id, start_date, end_date, hid))
     db.commit()
