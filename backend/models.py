@@ -453,8 +453,18 @@ def update_equipment(eid, EquipmentName, PurchaseDate, Condition, RoomID):
 def delete_equipment(eid):
     db = get_db()
     cur = db.cursor()
-    cur.execute("DELETE FROM Equipment WHERE EquipmentID=%s", (eid,))
-    db.commit()
+    try:
+        # Delete related MaintenanceLog records first
+        cur.execute("DELETE FROM MaintenanceLog WHERE EquipmentID = %s", (eid,))
+        
+        # Then delete the Equipment
+        cur.execute("DELETE FROM Equipment WHERE EquipmentID = %s", (eid,))
+        db.commit()
+    except mysql.connector.Error as e:
+        flash(f"Database error: {str(e)}", "error")
+    finally:
+        cur.close()
+        db.close()
 
 def get_equipment_by_id(eid):
     db = get_db()
